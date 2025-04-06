@@ -1,9 +1,12 @@
 local M = {}
+--- @module "prompts.commands" Command handlers for AI-powered code prompts
+-- Module provides user commands for document generation, refactoring, and code improvement
 local utils = require("prompts.utils")
 
 --- Internal function to handle prompt command execution
----@param command string The subcommand to run
----@param files table List of files to process
+--- @param command string The AI subcommand to execute (e.g. "docstrings", "typehints")
+--- @param files table List of files to process (uses current buffer if empty)
+--- @usage run_prompt_command("docstrings", {"src/main.lua"})
 local function run_prompt_command(command, files)
     if #files == 0 then
         files = { vim.api.nvim_buf_get_name(0) }
