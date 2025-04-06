@@ -1,7 +1,7 @@
 local M = {}
 
-local commands = require("bartste-prompts.commands")
-local utils = require("bartste-prompts.utils")
+local commands = require("prompts.commands")
+local utils = require("prompts.utils")
 
 function M.setup(opts)
     opts = opts or {}

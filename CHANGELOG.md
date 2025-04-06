@@ -1,4 +1,4 @@
-# Changelog - nvim-bartste-prompts
+# Changelog - nvim-prompts
 
 This document describes the changes that were made to the software for each
 version. The changes are described concisely, to make it comprehensible for the

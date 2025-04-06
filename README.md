@@ -1,4 +1,4 @@
-# README - nvim-bartste-prompts
+# README - nvim-prompts
 
 # CONTENTS
 
