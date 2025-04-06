@@ -1,6 +1,9 @@
 local M = {}
 local utils = require("prompts.utils")
 
+--- Internal function to handle prompt command execution
+---@param command string The subcommand to run
+---@param files table List of files to process
 local function run_prompt_command(command, files)
     if #files == 0 then
         files = { vim.api.nvim_buf_get_name(0) }
@@ -37,22 +40,32 @@ local function run_prompt_command(command, files)
     end)
 end
 
+--- Generate docstrings for code using AI prompts
+---@param opts table Command options containing files in fargs
 function M.docstrings(opts)
     run_prompt_command("docstrings", opts.fargs)
 end
 
+--- Add type hints to code using AI prompts
+---@param opts table Command options containing files in fargs
 function M.typehints(opts)
     run_prompt_command("typehints", opts.fargs)
 end
 
+--- Refactor code using AI prompts
+---@param opts table Command options containing files in fargs
 function M.refactor(opts)
     run_prompt_command("refactor", opts.fargs)
 end
 
+--- Fix code issues using AI prompts
+---@param opts table Command options containing files in fargs
 function M.fix(opts)
     run_prompt_command("fix", opts.fargs)
 end
 
+--- Generate unit tests using AI prompts
+---@param opts table Command options containing files in fargs
 function M.unittests(opts)
     run_prompt_command("unittests", opts.fargs)
 end
