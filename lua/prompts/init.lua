@@ -1,7 +1,6 @@
 local M = {}
 
 local commands = require("prompts.commands")
-local utils = require("prompts.utils")
 
 function M.setup(opts)
     opts = opts or {}
