@@ -29,6 +29,7 @@ local function run_prompt_command(command, files)
 
             if utils.prompt_user_accept() then
                 vim.api.nvim_buf_set_lines(0, 0, -1, false, modified)
+                vim.cmd("Gvdiffsplit!")
                 vim.notify("Changes applied", vim.log.levels.INFO)
             else
                 vim.notify("Changes discarded", vim.log.levels.WARN)
