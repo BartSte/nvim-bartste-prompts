@@ -1,5 +1,9 @@
 local M = {}
 
+--- Run an external prompt command and handle its output
+-- @param command string The command to execute
+-- @param files table List of files to process
+-- @param callback function Callback that receives (result, error)
 function M.run_prompt(command, files, callback)
   local stdout = vim.loop.new_pipe(false)
   local stderr = vim.loop.new_pipe(false)
@@ -41,6 +45,10 @@ function M.run_prompt(command, files, callback)
   end)
 end
 
+--- Show a diff comparison between original and modified content
+-- @param original table Original lines of text
+-- @param modified table Modified lines of text
+-- @return number, number Buffer handles for original and modified windows
 function M.show_diff(original, modified)
   vim.cmd("tabnew")
   local buf = vim.api.nvim_get_current_buf()
@@ -54,6 +62,8 @@ function M.show_diff(original, modified)
   return buf, diff_buf
 end
 
+--- Prompt user to accept or reject changes
+-- @return boolean True if user accepts changes
 function M.prompt_user_accept()
   local choice = vim.fn.input("Accept changes? (y/n): ")
   return choice:lower() == "y"
