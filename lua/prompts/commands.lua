@@ -11,9 +11,28 @@ local function run_prompt_command(command, files)
 
     local original = vim.api.nvim_buf_get_lines(0, 0, -1, false)
 
-    vim.notify("Running prompt command...", vim.log.levels.INFO)
+    -- Create progress indicator
+    local progress_buf = vim.api.nvim_create_buf(false, true)
+    local width = 30
+    local height = 3
+    local win = vim.api.nvim_open_win(progress_buf, true, {
+        relative = 'editor',
+        width = width,
+        height = height,
+        col = (vim.o.columns - width) / 2,
+        row = (vim.o.lines - height) / 2 - 1,  -- Adjust for status line
+        style = 'minimal',
+        border = 'rounded'
+    })
+    vim.api.nvim_buf_set_lines(progress_buf, 0, -1, false, {' Processing... ⌛ ', 'Please wait'})
+    vim.api.nvim_win_set_option(win, 'winhl', 'Normal:FloatBorder')
 
     utils.run_prompt(command, files, function(result, err)
+        -- Clean up progress window first
+        vim.schedule(function()
+            pcall(vim.api.nvim_win_close, win, {force = true})
+            pcall(vim.api.nvim_buf_delete, progress_buf, {force = true})
+        end)
         if not result then
             vim.notify("Error: " .. err, vim.log.levels.ERROR)
             return
