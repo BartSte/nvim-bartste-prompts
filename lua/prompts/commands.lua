@@ -48,14 +48,18 @@ local function run_prompt_command(command, files)
 
             if utils.prompt_user_accept() then
                 vim.api.nvim_buf_set_lines(0, 0, -1, false, modified)
-                vim.cmd("Gvdiffsplit!")
-                vim.notify("Changes applied", vim.log.levels.INFO)
+                vim.schedule(function()
+                    vim.cmd("Gvdiffsplit!")
+                    vim.notify("Changes applied", vim.log.levels.INFO)
+                end)
             else
                 vim.notify("Changes discarded", vim.log.levels.WARN)
             end
 
-            vim.api.nvim_buf_delete(orig_buf, { force = true })
-            vim.api.nvim_buf_delete(mod_buf, { force = true })
+            vim.schedule(function()
+                vim.api.nvim_buf_delete(orig_buf, { force = true })
+                vim.api.nvim_buf_delete(mod_buf, { force = true })
+            end)
         end)
     end)
 end
