@@ -1,14 +1,47 @@
 local M = {}
 
-function M.run_prompt(command, files)
+function M.run_prompt(command, files, callback)
     local cmd = string.format("prompts %s %s", command, table.concat(files, " "))
-    local handle = io.popen(cmd)
+    local stdout = vim.loop.new_pipe(false)
+    local stderr = vim.loop.new_pipe(false)
+    
+    local handle, pid
+    handle, pid = vim.loop.spawn("prompts", {
+        args = {command, unpack(files)},
+        stdio = {nil, stdout, stderr},
+    }, function(code, signal)
+        stdout:read_stop()
+        stderr:read_stop()
+        stdout:close()
+        stderr:close()
+        handle:close()
+        
+        if code ~= 0 then
+            callback(nil, "Command failed with code "..code)
+        end
+    end)
+    
     if not handle then
-        return nil, "Failed to run prompts command"
+        return callback(nil, "Failed to spawn process")
     end
-    local result = handle:read("*a")
-    handle:close()
-    return result
+    
+    local result = {}
+    stdout:read_start(function(err, data)
+        if err then
+            return callback(nil, "Read error: "..err)
+        end
+        if data then
+            table.insert(result, data)
+        end
+    end)
+    
+    stderr:read_start(function(err, data)
+        if err or data then
+            return callback(nil, "Error: "..(data or err))
+        end
+    end)
+    
+    vim.loop.check_active(handle)
 end
 
 function M.show_diff(original, modified)
