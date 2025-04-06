@@ -41,7 +41,6 @@ function M.run_prompt(command, files, callback)
         end
     end)
     
-    vim.loop.check_active(handle)
 end
 
 function M.show_diff(original, modified)
