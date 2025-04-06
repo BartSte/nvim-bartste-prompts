@@ -12,7 +12,15 @@ local function run_prompt_command(command, files)
     local original = vim.api.nvim_buf_get_lines(0, 0, -1, false)
 
 
+    local notify_id = vim.notify("Processing " .. command .. "...", "info", {
+        title = "Prompt Processing",
+        timeout = false,
+        hide_from_history = true
+    })
+
     utils.run_prompt(command, files, function(result, err)
+        -- Clear progress notification
+        vim.notify(function() end, { replace = notify_id })
         if not result then
             vim.notify("Error: " .. err, vim.log.levels.ERROR)
             return

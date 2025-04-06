@@ -53,12 +53,13 @@ function M.show_diff(original, modified)
   vim.cmd("tabnew")
   local buf = vim.api.nvim_get_current_buf()
   vim.api.nvim_buf_set_lines(buf, 0, -1, false, original)
-
-  vim.cmd("vnew")
+  
+  vim.cmd("vsplit")
   local diff_buf = vim.api.nvim_get_current_buf()
   vim.api.nvim_buf_set_lines(diff_buf, 0, -1, false, modified)
-
+  
   vim.cmd("windo diffthis")
+  vim.cmd("diffupdate")
   return buf, diff_buf
 end
 
