@@ -11,17 +11,17 @@ local function run_prompt_command(command, files)
 
     local original = vim.api.nvim_buf_get_lines(0, 0, -1, false)
 
-    -- Show transient notification at top right
-    vim.notify(" Processing... ⌛ ", vim.log.levels.INFO, {
+    -- Show transient notification at top right and store reference
+    local notif_id = vim.notify(" Processing... ⌛ ", vim.log.levels.INFO, {
         title = "prompts.nvim",
-        timeout = false,  -- We'll clear it manually
-        on_close = function() end  -- Dummy function to prevent auto-remove
+        timeout = false,
+        on_close = function() end
     })
 
     utils.run_prompt(command, files, function(result, err)
-        -- Clear progress notification
+        -- Clear progress notification using stored ID
         vim.schedule(function()
-            vim.notify("", vim.log.levels.INFO, {})  -- Clears last notification
+            pcall(vim.notify_delete, notif_id)
         end)
         if not result then
             vim.notify("Error: " .. err, vim.log.levels.ERROR)
