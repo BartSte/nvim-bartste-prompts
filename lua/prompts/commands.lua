@@ -11,18 +11,8 @@ local function run_prompt_command(command, files)
 
     local original = vim.api.nvim_buf_get_lines(0, 0, -1, false)
 
-    -- Show transient notification at top right and store reference
-    local notif_id = vim.notify(" Processing... ⌛ ", vim.log.levels.INFO, {
-        title = "prompts.nvim",
-        timeout = false,
-        on_close = function() end
-    })
 
     utils.run_prompt(command, files, function(result, err)
-        -- Clear progress notification using stored ID
-        vim.schedule(function()
-            pcall(vim.notify_delete, notif_id)
-        end)
         if not result then
             vim.notify("Error: " .. err, vim.log.levels.ERROR)
             return
@@ -38,10 +28,7 @@ local function run_prompt_command(command, files)
 
             if utils.prompt_user_accept() then
                 vim.api.nvim_buf_set_lines(0, 0, -1, false, modified)
-                vim.schedule(function()
-                    vim.cmd("Gvdiffsplit!")
-                    vim.notify("Changes applied", vim.log.levels.INFO)
-                end)
+                vim.notify("Changes applied", vim.log.levels.INFO)
             else
                 vim.notify("Changes discarded", vim.log.levels.WARN)
             end
