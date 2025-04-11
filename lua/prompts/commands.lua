@@ -1,85 +1,37 @@
 local M = {}
---- @module "prompts.commands" Command handlers for AI-powered code prompts
--- Module provides user commands for document generation, refactoring, and code improvement
-local utils = require("prompts.utils")
 
---- Internal function to handle prompt command execution
---- @param command string The AI subcommand to execute (e.g. "docstrings", "typehints")
---- @param files table List of files to process (uses current buffer if empty)
---- @usage run_prompt_command("docstrings", {"src/main.lua"})
-local function run_prompt_command(command, files)
-    if #files == 0 then
-        files = { vim.api.nvim_buf_get_name(0) }
-    end
-
-    local original = vim.api.nvim_buf_get_lines(0, 0, -1, false)
-
-
-    local notify_id = vim.notify("Processing " .. command .. "...", "info", {
-        title = "Prompt Processing",
-        timeout = false,
-        hide_from_history = true
-    })
-
-    utils.run_prompt(command, files, function(result, err)
-        -- Clear progress notification
-        vim.notify(function() end, { replace = notify_id })
-        if not result then
-            vim.notify("Error: " .. err, vim.log.levels.ERROR)
-            return
-        end
-
-        local modified = {}
-        for _, chunk in ipairs(result) do
-            vim.list_extend(modified, vim.split(chunk, "\n"))
-        end
-
-        vim.schedule(function()
-            local orig_buf, mod_buf = utils.show_diff(original, modified)
-
-            if utils.prompt_user_accept() then
-                vim.api.nvim_buf_set_lines(0, 0, -1, false, modified)
-                vim.notify("Changes applied", vim.log.levels.INFO)
-            else
-                vim.notify("Changes discarded", vim.log.levels.WARN)
-            end
-
-            vim.schedule(function()
-                vim.api.nvim_buf_delete(orig_buf, { force = true })
-                vim.api.nvim_buf_delete(mod_buf, { force = true })
-            end)
-        end)
-    end)
+--- Creates a command function that runs a given command on the current buffer file.
+---@param command string The command to run.
+---@return function A function without parameters that executes the command.
+function M.make(command)
+  return function()
+    local file = vim.api.nvim_buf_get_name(0)
+    local ft = vim.bo.filetype
+    M.run(command, file, ft)
+  end
 end
 
---- Generate docstrings for code using AI prompts
----@param opts table Command options containing files in fargs
-function M.docstrings(opts)
-    run_prompt_command("docstrings", opts.fargs)
+--- Callback function executed when a system command exits.
+---@param obj table The exit information with fields: code (number), stdout (string), stderr (string)
+local function on_exit(obj)
+  if obj.code ~= 0 then
+    vim.notify("Command failed with exit code: " .. obj.code, vim.log.levels.ERROR)
+    vim.notify("stderr: " .. obj.stderr, vim.log.levels.ERROR)
+    vim.notify("stdout: " .. obj.stdout, vim.log.levels.INFO)
+  else
+    vim.notify("Command succeeded", vim.log.levels.INFO)
+  end
 end
 
---- Add type hints to code using AI prompts
----@param opts table Command options containing files in fargs
-function M.typehints(opts)
-    run_prompt_command("typehints", opts.fargs)
-end
 
---- Refactor code using AI prompts
----@param opts table Command options containing files in fargs
-function M.refactor(opts)
-    run_prompt_command("refactor", opts.fargs)
-end
-
---- Fix code issues using AI prompts
----@param opts table Command options containing files in fargs
-function M.fix(opts)
-    run_prompt_command("fix", opts.fargs)
-end
-
---- Generate unit tests using AI prompts
----@param opts table Command options containing files in fargs
-function M.unittests(opts)
-    run_prompt_command("unittests", opts.fargs)
+--- Executes a system command using prompts-aider with the given parameters.
+---@param command string The command identifier.
+---@param file string The current file name.
+---@param ft string The filetype.
+function M.run(command, file, ft)
+  local cmd = { "prompts-aider", command, file, "--filetype", ft }
+  vim.notify("Running: " .. table.concat(cmd, " "))
+  vim.system(cmd, {}, on_exit)
 end
 
 return M
