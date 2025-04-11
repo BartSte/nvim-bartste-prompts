@@ -6,11 +6,16 @@ local commands = require("prompts.commands")
 --- @param opts? table Optional configuration options.
 function M.setup(opts)
   opts = opts or {}
-  vim.api.nvim_create_user_command("AiDocstrings", commands.make("docstrings"), { range = true })
-  vim.api.nvim_create_user_command("AiTypehints", commands.make("typehints"), { range = true })
-  vim.api.nvim_create_user_command("AiRefactor", commands.make("refactor"), { range = true })
-  vim.api.nvim_create_user_command("AiFix", commands.make("fix"), { range = true })
-  vim.api.nvim_create_user_command("AiTests", commands.make("unittests"), { range = true })
+  local command_mappings = {
+    { name = "AiDocstrings", type = "docstrings" },
+    { name = "AiTypehints",  type = "typehints" },
+    { name = "AiRefactor",   type = "refactor" },
+    { name = "AiFix",        type = "fix" },
+    { name = "AiTests",      type = "unittests" },
+  }
+  for _, cmd in ipairs(command_mappings) do
+    vim.api.nvim_create_user_command(cmd.name, commands.make(cmd.type), { range = true })
+  end
 end
 
 return M
