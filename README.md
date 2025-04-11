@@ -14,6 +14,18 @@ refactoring, type hints, and test generation.
 
 ## Installation
 
+Make sure that [bartste-prompts](https://github.com/BartSte/bartste-prompts) is
+installed and in your PATH. You can do this by running:
+
+```bash
+python --version # must be <=3.12 for aider to work
+pipx install aider
+pipx install git+https://github.com/BartSte/bartste-prompts.git
+```
+
+It is recommended to use `pipx` instead of `pip` so you can safely install it on
+a global scope.
+
 You can install this plugin using your favorite Neovim plugin manager. For
 example, using `lazy.nvim`:
 
