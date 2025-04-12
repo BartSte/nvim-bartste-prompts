@@ -1,11 +1,16 @@
 local M = {}
 
+---Get information about the current buffer
+---@return string file Current buffer's file name
+---@return string filetype Current buffer's file type
 local function get_current_buffer_info()
   local file = vim.api.nvim_buf_get_name(0)
   local filetype = vim.bo.filetype
   return file, filetype
 end
 
+---Reload the specified buffer in the current window
+---@param file string The file path to reload from disk
 local function reload_buffer(file)
   local buf = vim.fn.bufnr(file)
   if buf ~= -1 and vim.fn.bufloaded(buf) == 1 then
