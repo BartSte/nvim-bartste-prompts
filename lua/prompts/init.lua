@@ -2,16 +2,14 @@ local M = {}
 
 local commands = require("prompts.commands")
 
---- Configures Neovim user commands for AI prompts.
---- @param opts? table Optional configuration options.
-function M.setup(opts)
-  opts = opts or {}
-
+local function check_executables()
   if vim.fn.executable("prompts") == 0 or vim.fn.executable("aider") == 0 then
     vim.notify("Missing required executables: 'prompts' and/or 'aider' must be in PATH", vim.log.levels.ERROR)
     return
   end
+end
 
+local function set_mappings()
   local command_mappings = {
     { name = "AiDocstrings", type = "docstrings" },
     { name = "AiTypehints",  type = "typehints" },
@@ -22,6 +20,12 @@ function M.setup(opts)
   for _, cmd in ipairs(command_mappings) do
     vim.api.nvim_create_user_command(cmd.name, commands.make(cmd.type), { range = true })
   end
+end
+
+function M.setup(opts)
+  opts = opts or {}
+  check_executables()
+  set_mappings()
 end
 
 return M
