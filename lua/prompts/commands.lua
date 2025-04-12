@@ -6,6 +6,10 @@ local function get_current_buffer_info()
   return file, filetype
 end
 
+local function reload_buffer(file)
+  --TODO
+end
+
 --- Creates a command function that runs a given command on the current buffer file.
 ---@param command string The command to run.
 ---@return function A function without parameters that executes the command.
@@ -13,6 +17,7 @@ function M.make(command)
   return function()
     local file, ft = get_current_buffer_info()
     M.run(command, file, ft)
+    reload_buffer(file)
   end
 end
 
