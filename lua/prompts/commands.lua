@@ -1,27 +1,9 @@
 local M = {}
 
----Get information about the current buffer
----@return string file Current buffer's file name
----@return string filetype Current buffer's file type
-local function get_current_buffer_info()
-  local file = vim.api.nvim_buf_get_name(0)
-  local filetype = vim.bo.filetype
-  return file, filetype
-end
-
----Reload the specified buffer in the current window
----@param file string The file path to reload from disk
+--- Reloads the current buffer from disk without prompting
+---@param file string The path of the file to reload
 local function reload_buffer(file)
-  local buf = vim.fn.bufnr(file)
-  if buf ~= -1 and vim.fn.bufloaded(buf) == 1 then
-    vim.api.nvim_buf_delete(buf, { force = true })
-  end
-
-  if vim.api.nvim_get_current_buf() == buf then
-    vim.api.nvim_set_current_buf(vim.api.nvim_create_buf(true, false))
-  end
-
-  vim.cmd("silent! edit! " .. vim.fn.fnameescape(file))
+  vim.cmd("silent! edit! " .. file)
 end
 
 --- Creates a command function that runs a given command on the current buffer file.
@@ -29,8 +11,9 @@ end
 ---@return function A function without parameters that executes the command.
 function M.make(command)
   return function()
-    local file, ft = get_current_buffer_info()
-    M.run(command, file, ft)
+    local file = vim.api.nvim_buf_get_name(0)
+    local filetype = vim.bo.filetype
+    M.run(command, file, filetype)
     reload_buffer(file)
   end
 end
