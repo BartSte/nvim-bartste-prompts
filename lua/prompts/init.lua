@@ -6,6 +6,12 @@ local commands = require("prompts.commands")
 --- @param opts? table Optional configuration options.
 function M.setup(opts)
   opts = opts or {}
+
+  if vim.fn.executable("prompts") == 0 or vim.fn.executable("aider") == 0 then
+    vim.notify("Missing required executables: 'prompts' and/or 'aider' must be in PATH", vim.log.levels.ERROR)
+    return
+  end
+
   local command_mappings = {
     { name = "AiDocstrings", type = "docstrings" },
     { name = "AiTypehints",  type = "typehints" },
