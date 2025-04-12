@@ -7,7 +7,19 @@ local function get_current_buffer_info()
 end
 
 local function reload_buffer(file)
-  --TODO
+  local buf = vim.fn.bufnr(file)
+  if buf ~= -1 and vim.fn.bufloaded(buf) == 1 then
+    -- Force delete buffer to ensure clean reload
+    vim.api.nvim_buf_delete(buf, {force = true})
+  end
+  
+  -- Check if current window uses the deleted buffer
+  if vim.api.nvim_get_current_buf() == buf then
+    vim.api.nvim_set_current_buf(vim.api.nvim_create_buf(true, false))
+  end
+  
+  -- Reload the file while preserving cursor position
+  vim.cmd("silent! edit! " .. vim.fn.fnameescape(file))
 end
 
 --- Creates a command function that runs a given command on the current buffer file.
