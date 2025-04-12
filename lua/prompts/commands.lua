@@ -34,7 +34,7 @@ end
 ---@param file string The current file name.
 ---@param ft string The filetype.
 function M.run(command, file, ft)
-  local cmd = { "prompts", command, file, "--filetype", ft, "--tool", "aider" }
+  local cmd = { "prompts", command, file, "--filetype", ft, "--action", "aider" }
   vim.notify(string.format("Running: %s", table.concat(cmd, " ")))
   vim.system(cmd, {}, on_exit)
 end
