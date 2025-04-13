@@ -11,11 +11,11 @@ function M.make(command)
   end
 end
 
---- Callback handler for command execution completion
----@param obj {code: number, stdout: string, stderr: string} Table containing exit status and outputs
----@field code number Exit status code (0 indicates success)
----@field stdout string Standard output content
----@field stderr string Standard error content
+--- Handle command completion results and notify user
+---@param obj table Command exit information containing:
+---@field code number Exit status code (0 for success)
+---@field stdout string Captured standard output
+---@field stderr string Captured standard error
 local function on_exit(obj)
   if obj.code ~= 0 then
     vim.notify(string.format("Command failed with exit code: %d", obj.code), vim.log.levels.ERROR)
@@ -27,6 +27,9 @@ local function on_exit(obj)
   lock = ''
 end
 
+--- Execute a system command for the current buffer with concurrency control
+---@param command string The identifier of the command to execute
+---@private
 local function run(command)
   if lock ~= '' then
     vim.notify(string.format("Another command '%s' is already running", lock), vim.log.levels.WARN)
