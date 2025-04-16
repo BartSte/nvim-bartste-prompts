@@ -12,7 +12,7 @@ local function schedule_on_exit(file)
       vim.notify(string.format("stdout: %s", obj.stdout), vim.log.levels.INFO)
     else
       vim.notify("Command succeeded. Run :AiUndo to undo the changes.", vim.log.levels.INFO)
-      vim.cmd(string.format("tabnew | e %s | diffsplit %s", file, old))
+      vim.cmd(string.format("tabnew | e %s | diffsplit %s | set filetype=%s", file, old, vim.bo.filetype))
     end
     lock = ''
   end)
