@@ -2,9 +2,8 @@ local M = {}
 
 local commands = require("prompts.commands")
 
---- Checks if required executables ('prompts' and 'aider') are available in PATH
---- Shows an error notification if any executables are missing
----@return nil
+--- Checks for required external executables in PATH
+--- Notifies an error and prevents command creation if missing
 local function check_executables()
   if vim.fn.executable("prompts") == 0 or vim.fn.executable("aider") == 0 then
     vim.notify("Missing required executables: 'prompts' and/or 'aider' must be in PATH", vim.log.levels.ERROR)
@@ -12,31 +11,37 @@ local function check_executables()
   end
 end
 
---- Creates Neovim user commands for AI code operations
---- Maps commands like AiDocstrings, AiTypehints, etc. to their implementations
----@return nil
-local function set_mappings()
-  local command_mappings = {
+--- Creates Neovim user commands for different AI prompt types
+--- Commands created: AiDocstrings, AiTypehints, AiRefactor, AiFix, AiTests
+--- Each command executes the corresponding prompt type through commands.make()
+local function make_prompt_commands()
+  local prompt_commands = {
     { name = "AiDocstrings", type = "docstrings" },
     { name = "AiTypehints",  type = "typehints" },
     { name = "AiRefactor",   type = "refactor" },
     { name = "AiFix",        type = "fix" },
     { name = "AiTests",      type = "unittests" },
-    { name = "AiUndo",       type = "undo" },
   }
-  for _, cmd in ipairs(command_mappings) do
+  for _, cmd in ipairs(prompt_commands) do
     vim.api.nvim_create_user_command(cmd.name, commands.make(cmd.type), { range = true })
   end
 end
 
---- Initializes the plugin configuration and sets up command mappings
----@param opts? table Optional configuration table (currently unused)
----@return nil
+--- Creates all Neovim user commands for the plugin
+--- - AiUndo command for undo functionality
+--- - Prompt-based commands created by make_prompt_commands()
+local function make_commands()
+  vim.api.nvim_create_user_command("AiUndo", commands.undo, {})
+  make_prompt_commands()
+end
+
+--- Initializes the plugin configuration
+--- @param opts table|nil Optional configuration table (currently unused)
 function M.setup(opts)
   opts = opts or {}
   vim.env["AIDER_AUTO_COMMITS"] = "False"
   check_executables()
-  set_mappings()
+  make_commands()
 end
 
 return M
