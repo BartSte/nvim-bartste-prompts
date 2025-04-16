@@ -38,7 +38,8 @@ function M.run(command)
   end
 
   active_command = command
-  local file = vim.api.nvim_buf_get_name(0)
+  M.original_file = vim.api.nvim_buf_get_name(0)  -- Store original file path
+  local file = M.original_file
   local filetype = vim.bo.filetype
   local cmd = { "prompts", command, file, "--filetype", filetype, "--action", "aider" }
   vim.notify(string.format("Running command %s", command), vim.log.levels.INFO)
@@ -53,10 +54,15 @@ function M.undo()
     return
   end
 
-  local file = vim.api.nvim_buf_get_name(0) -- TODO: this is a big issue as it could be any file, and not perse the file we edited
-  vim.fn.writefile(vim.fn.readfile(old), file)
-  vim.cmd("e!")
-  vim.notify(string.format("File %s restored", vim.fn.fnamemodify(file, ":.")), vim.log.levels.INFO)
+  -- Use the stored original file path from when the command was run
+  if not M.original_file or vim.fn.filereadable(M.original_file) == 0 then
+    vim.notify("Original file path is no longer valid", vim.log.levels.ERROR)
+    return
+  end
+  
+  vim.fn.writefile(vim.fn.readfile(old), M.original_file)
+  vim.cmd("e! " .. M.original_file)  -- Force reload the original file
+  vim.notify(string.format("File %s restored", vim.fn.fnamemodify(M.original_file, ":.")), vim.log.levels.INFO)
 end
 
 return M
