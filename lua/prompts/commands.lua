@@ -2,9 +2,6 @@ local M = {}
 
 local lock = ''
 
---- Handles command completion and cleanup, schedules buffer operations
----@param file string Path to the file being processed
----@return function # Wrapped function for vim.schedule_wrap
 local function schedule_on_exit(file)
   ---@param obj table Process completion object {code: number, stdout: string, stderr: string}
   return vim.schedule_wrap(function(obj)

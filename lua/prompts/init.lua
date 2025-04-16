@@ -33,6 +33,7 @@ end
 ---@return nil
 function M.setup(opts)
   opts = opts or {}
+  vim.env["AIDER_AUTO_COMMITS"] = "False"
   check_executables()
   set_mappings()
 end
