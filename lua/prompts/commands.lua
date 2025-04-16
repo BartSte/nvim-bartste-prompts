@@ -1,23 +1,18 @@
 local M = {}
 
 local lock = ''
+local old = vim.fn.tempname()
 
 local function schedule_on_exit(file)
-  ---@param obj table Process completion object {code: number, stdout: string, stderr: string}
+  vim.fn.writefile(vim.fn.readfile(file), old)
   return vim.schedule_wrap(function(obj)
     if obj.code ~= 0 then
       vim.notify(string.format("Command failed with exit code: %d", obj.code), vim.log.levels.ERROR)
       vim.notify(string.format("stderr: %s", obj.stderr), vim.log.levels.ERROR)
       vim.notify(string.format("stdout: %s", obj.stdout), vim.log.levels.INFO)
     else
-      vim.notify("Command succeeded", vim.log.levels.INFO)
-      local cmd = string.format("tabnew | e %s", file)
-      if vim.g.loaded_fugitive == 1 then
-        cmd = cmd .. ' | Gvdiffsplit !~1'
-      else
-        vim.notify("Fugitive not loaded, no diff view available.", vim.log.levels.WARN)
-      end
-      vim.cmd(cmd)
+      vim.notify("Command succeeded. Run :AiUndo to undo the changes.", vim.log.levels.INFO)
+      vim.cmd(string.format("tabnew | e %s | diffsplit %s", file, old))
     end
     lock = ''
   end)
