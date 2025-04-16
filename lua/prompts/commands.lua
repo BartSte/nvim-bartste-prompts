@@ -63,4 +63,18 @@ function M.make(command)
   end
 end
 
+--- Restores the current file from the stored old version
+---@return nil
+function M.undo()
+  if old == '' or vim.fn.filereadable(old) == 0 then
+    vim.notify("No previous version to restore", vim.log.levels.ERROR)
+    return
+  end
+
+  local file = vim.api.nvim_buf_get_name(0)
+  vim.fn.writefile(vim.fn.readfile(old), file)
+  vim.cmd("e!")
+  vim.notify(string.format("File %s restored", file), vim.log.levels.INFO)
+end
+
 return M

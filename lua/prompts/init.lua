@@ -22,6 +22,7 @@ local function set_mappings()
     { name = "AiRefactor",   type = "refactor" },
     { name = "AiFix",        type = "fix" },
     { name = "AiTests",      type = "unittests" },
+    { name = "AiUndo",       type = "undo" },
   }
   for _, cmd in ipairs(command_mappings) do
     vim.api.nvim_create_user_command(cmd.name, commands.make(cmd.type), { range = true })
