@@ -1,5 +1,10 @@
 local M = {}
 
+---@class State
+---@field lock boolean Whether a command is currently running
+---@field command string The currently executing command name
+---@field file string Path to the original file being processed
+---@field file_copy string Temporary backup file path
 local State = {
   lock = false,
   command = '',
@@ -25,9 +30,9 @@ local function on_exit(file)
   end)
 end
 
---- Creates a command wrapper function for use in mappings/callbacks
----@param command string The command to execute when called
----@return function Function suitable for mappings/callbacks
+--- Creates a command wrapper function for key mappings/callbacks
+---@param command string The CLI command to execute
+---@return fun(): nil # Function that executes the command when called
 function M.make(command)
   return function()
     M.run(command)
@@ -35,7 +40,8 @@ function M.make(command)
 end
 
 --- Executes a command with proper error handling and state management
----@param command string The command to execute
+---@param command string The CLI command to execute
+---@return nil
 function M.run(command)
   if State.lock then
     vim.notify(string.format("Another command '%s' is already running", State.command), vim.log.levels.WARN)
@@ -50,22 +56,19 @@ function M.run(command)
   vim.system(cmd, {}, on_exit(State.file))
 end
 
---- Restores the previous version of the file
---- Validates existing backup file before attempting restoration
 function M.undo()
   if State.file_copy == '' or vim.fn.filereadable(State.file_copy) == 0 then
     vim.notify("No previous version to restore", vim.log.levels.ERROR)
     return
   end
 
-  -- Use the stored original file path from when the command was run
-  if not State.file or vim.fn.filereadable(M.original_file) == 0 then
+  if not State.file or vim.fn.filereadable(State.file) == 0 then
     vim.notify("Original file path is no longer valid", vim.log.levels.ERROR)
     return
   end
 
   vim.fn.writefile(vim.fn.readfile(State.file_copy), State.file)
-  vim.cmd("e! " .. State.file) -- Force reload the original file
+  vim.cmd("e! " .. State.file)
   vim.notify(string.format("File %s restored", vim.fn.fnamemodify(State.file, ":.")), vim.log.levels.INFO)
 end
 
