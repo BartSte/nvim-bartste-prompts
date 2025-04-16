@@ -69,4 +69,8 @@ function M.undo()
   vim.notify(string.format("File %s restored", vim.fn.fnamemodify(State.file, ":.")), vim.log.levels.INFO)
 end
 
+function M.is_running()
+  return State.lock
+end
+
 return M

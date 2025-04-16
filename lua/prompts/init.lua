@@ -32,6 +32,7 @@ end
 --- - Prompt-based commands created by make_prompt_commands()
 local function make_commands()
   vim.api.nvim_create_user_command("AiUndo", commands.undo, {})
+  vim.api.nvim_create_user_command("AiIsRunning", commands.is_running, {})
   make_prompt_commands()
 end
 
