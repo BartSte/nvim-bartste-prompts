@@ -2,10 +2,11 @@ local M = {}
 
 local lock = ''
 
---- Handles command execution cleanup and notification
+--- Handles command completion and cleanup, schedules buffer operations
 ---@param file string Path to the file being processed
----@return function # Wrapped callback function for vim.schedule_wrap
+---@return function # Wrapped function for vim.schedule_wrap
 local function schedule_on_exit(file)
+  ---@param obj table Process completion object {code: number, stdout: string, stderr: string}
   return vim.schedule_wrap(function(obj)
     if obj.code ~= 0 then
       vim.notify(string.format("Command failed with exit code: %d", obj.code), vim.log.levels.ERROR)
@@ -13,7 +14,13 @@ local function schedule_on_exit(file)
       vim.notify(string.format("stdout: %s", obj.stdout), vim.log.levels.INFO)
     else
       vim.notify("Command succeeded", vim.log.levels.INFO)
-      vim.cmd("e " .. file)
+      local cmd = string.format("tabnew | e %s", file)
+      if vim.g.loaded_fugitive == 1 then
+        cmd = cmd .. ' | Gvdiffsplit !~1'
+      else
+        vim.notify("Fugitive not loaded, no diff view available.", vim.log.levels.WARN)
+      end
+      vim.cmd(cmd)
     end
     lock = ''
   end)
@@ -21,11 +28,11 @@ end
 
 --- Executes a system command with concurrency control
 ---@param command string Command identifier to execute
----@private
----@note Uses global lock mechanism to prevent concurrent executions
----@sideeffect Modifies global lock state and creates system process
----@emits vim.notify for command status updates
+---@return nil
 local function run(command)
+  -- Implements a global lock to prevent concurrent command executions
+  -- Notifies command status through vim.notify
+  -- Creates new buffer tab on success when fugitive is available
   if lock ~= '' then
     vim.notify(string.format("Another command '%s' is already running", lock), vim.log.levels.WARN)
     return
@@ -41,11 +48,11 @@ end
 
 --- Safely executes a command using pcall error protection
 ---@param command string Command identifier to execute
----@see run # The internal implementation function
----@sideeffect May modify global lock state
----@return boolean # pcall success status
----@return any # pcall return value or error message
+---@return boolean # True if execution started successfully
+---@return any # Error message if execution failed
 function M.run(command)
+  -- Wraps run() in pcall for error handling
+  -- Manages lock state cleanup on failure
   local ok, _ = pcall(run, command)
   if not ok then
     vim.notify(string.format("Command %s failed", command), vim.log.levels.ERROR)
@@ -53,11 +60,12 @@ function M.run(command)
   end
 end
 
---- Creates a command closure for execution
+--- Creates a command closure for deferred execution
 ---@param command string Command identifier to bind
 ---@return function # Parameterless function that triggers command execution
----@usage local cmd = M.make("format") -- Creates cmd() function that runs formatter
 function M.make(command)
+  -- Returns a function that can be used as a callback or mapping target
+  -- Example: vim.keymap.set('n', '<leader>cf', M.make('format'))
   return function()
     M.run(command)
   end
