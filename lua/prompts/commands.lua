@@ -76,4 +76,14 @@ function M.is_running()
   return State.lock
 end
 
+--- Returns the currently running command name, or empty string.
+function M.current_command()
+  return State.command
+end
+
+--- Returns the file path on which the current command is running, or empty string.
+function M.current_file()
+  return State.file
+end
+
 return M
