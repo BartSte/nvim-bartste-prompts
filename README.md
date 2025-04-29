@@ -10,6 +10,8 @@ refactoring, type hints, and test generation.
 - Refactor code with AI suggestions
 - Fix common code issues
 - Generate unit tests
+- Show spinner icon with current command and file in statusline (using lualine integration)
+- Abort running command
 - Only aider is supported as AI framework for now.
 
 ## Installation
@@ -40,13 +42,15 @@ example, using `lazy.nvim`:
 
 ## Commands
 
-| Command         | Description                          | Mode   |
-| --------------- | ------------------------------------ | ------ |
-| `:AiDocstrings` | Generate documentation for code      | Normal |
-| `:AiTypehints`  | Add type annotations                 | Normal |
-| `:AiRefactor`   | Suggest refactoring improvements     | Normal |
-| `:AiFix`        | Identify and fix code issues         | Normal |
-| `:AiTests`      | Generate unit tests for current code | Normal |
+| Command         | Description                                    | Mode   |
+| --------------- | ---------------------------------------------- | ------ |
+| `:AiDocstrings` | Generate documentation for code                | Normal |
+| `:AiTypehints`  | Add type hints automatically                   | Normal |
+| `:AiRefactor`   | Suggest refactoring improvements               | Normal |
+| `:AiFix`        | Identify and fix code issues                   | Normal |
+| `:AiTests`      | Generate unit tests for current code           | Normal |
+| `:AiIsRunning`  | Check if a prompt command is currently running | Normal |
+| `:AiAbort`      | Abort the currently running prompt command     | Normal |
 
 ## Usage
 
