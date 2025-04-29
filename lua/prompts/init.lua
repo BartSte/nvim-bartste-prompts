@@ -39,6 +39,11 @@ end
 --- Initializes the plugin configuration
 --- @param opts table|nil Optional configuration table (currently unused)
 function M.setup(opts)
+  if vim.env["AIDER_MODEL"] == nil then
+    vim.notify("AIDER_MODEL environment variable not set. Aborting setup.", vim.log.levels.ERROR)
+    return
+  end
+
   opts = opts or {}
   vim.env["AIDER_AUTO_COMMITS"] = "False"
   check_executables()
