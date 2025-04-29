@@ -1,25 +1,21 @@
---- Lualine component for prompts commands integration.
---- Displays a spinner alongside the Aider model name when a command is running.
----@module prompts.lualine
 local commands = require("prompts.commands")
 
---- Spinner frames for the loading animation.
+--- A sequence of spinner frames used to animate the lualine spinner component.
 ---@type string[]
 local spinner_frames = { "⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏" }
---- Current index into `spinner_frames`.
----@type number
+--- Current index in spinner_frames for the animated spinner.
+---@type integer
 local spinner_index = 1
 
---- Module for lualine integration with prompts commands.
---- Provides a spinning icon based on the running state of commands.
+--- Lualine integration module for displaying Aider prompts in the statusline.
 ---@class prompts.lualine
----@field aider_icon fun():string Lualine component displaying model spinner.
 local M = {}
 
---- Returns a spinning icon if a command is running, otherwise an empty string.
+--- Lualine component for the Aider prompt spinner and command info.
+---@type table[]
 M.aider_icon = {
-  --- Returns a spinning icon if a command is running.
-  ---@return string spinning icon or empty string
+  --- Generates the formatted component string for lualine.
+  ---@return string the formatted segment or empty if no command is running.
   function()
     if commands.is_running() then
       local frame = spinner_frames[spinner_index]

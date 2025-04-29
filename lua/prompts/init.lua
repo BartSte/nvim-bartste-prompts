@@ -33,6 +33,7 @@ end
 local function make_commands()
   vim.api.nvim_create_user_command("AiUndo", commands.undo, {})
   vim.api.nvim_create_user_command("AiIsRunning", commands.is_running, {})
+  vim.api.nvim_create_user_command("AiAbort", commands.abort, {})
   make_prompt_commands()
 end
 

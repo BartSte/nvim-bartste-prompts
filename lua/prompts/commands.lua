@@ -9,7 +9,8 @@ local State = {
   lock = false,
   command = '',
   file = '',
-  file_copy = vim.fn.tempname()
+  file_copy = vim.fn.tempname(),
+  process = nil
 }
 
 --- Handles command execution cleanup and notification
@@ -23,6 +24,8 @@ local function on_exit(file)
       vim.notify(string.format("Command failed with exit code: %d", obj.code), vim.log.levels.ERROR)
       vim.notify(string.format("stderr: %s", obj.stderr), vim.log.levels.ERROR)
       vim.notify(string.format("stdout: %s", obj.stdout), vim.log.levels.INFO)
+    elseif State.process == nil then
+      vim.notify("Command aborted", vim.log.levels.WARN)
     else
       vim.notify("Command succeeded. Run :AiUndo to undo the changes.", vim.log.levels.INFO)
       vim.cmd(string.format("tabnew | e %s | diffsplit %s | set filetype=%s", file, State.file_copy, vim.bo.filetype))
@@ -53,7 +56,7 @@ function M.run(command)
   local filetype = vim.bo.filetype
   local cmd = { "prompts", command, State.file, "--filetype", filetype, "--action", "aider" }
   vim.notify(string.format("Running command %s", command), vim.log.levels.INFO)
-  vim.system(cmd, {}, on_exit(State.file))
+  State.process = vim.system(cmd, {}, on_exit(State.file))
 end
 
 function M.undo()
@@ -84,6 +87,17 @@ end
 --- Returns the file path on which the current command is running, or empty string.
 function M.current_file()
   return State.file
+end
+
+--- Aborts the currently running command, if any.
+function M.abort()
+  if State.lock and State.process then
+    State.process:kill()
+    State.lock = false
+    State.process = nil
+    State.command = ''
+    State.file = ''
+  end
 end
 
 return M
