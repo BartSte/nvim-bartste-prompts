@@ -40,6 +40,20 @@ example, using `lazy.nvim`:
 }
 ```
 
+## Configuration Options
+
+The `setup()` function accepts the following options:
+
+- `notify` (boolean): Whether to show spinner notification after AI commands complete. Default: `false`.
+
+Example:
+
+```lua
+require('prompts').setup({
+  notify = true,
+})
+```
+
 ## Commands
 
 | Command         | Description                                    | Mode   |

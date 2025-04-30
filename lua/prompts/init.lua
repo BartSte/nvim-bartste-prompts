@@ -1,6 +1,8 @@
 local M = {}
 
 local commands = require("prompts.commands")
+local default_opts = require("prompts.opts")
+local user_opts = {}
 
 --- Checks for required external executables in PATH
 --- Notifies an error and prevents command creation if missing
@@ -46,9 +48,11 @@ function M.setup(opts)
   end
 
   opts = opts or {}
+  user_opts = vim.tbl_deep_extend("force", default_opts, opts)
   vim.env["AIDER_AUTO_COMMITS"] = "False"
   check_executables()
   make_commands()
+  M.opts = user_opts
 end
 
 return M

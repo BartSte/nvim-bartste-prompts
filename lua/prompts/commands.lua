@@ -19,6 +19,7 @@ local State = {
 local function on_exit(file)
   vim.fn.writefile(vim.fn.readfile(file), State.file_copy)
   return vim.schedule_wrap(function(obj)
+    require("prompts.notifier").spinner.hide()
     State.lock = false
     if obj.code ~= 0 then
       vim.notify(string.format("Command failed with exit code: %d", obj.code), vim.log.levels.ERROR)
@@ -27,7 +28,6 @@ local function on_exit(file)
     elseif State.process == nil then
       vim.notify("Command aborted", vim.log.levels.WARN)
     else
-      vim.notify("Command succeeded. Run :AiUndo to undo the changes.", vim.log.levels.INFO)
       vim.cmd(string.format("tabnew | e %s | diffsplit %s | set filetype=%s", file, State.file_copy, vim.bo.filetype))
     end
   end)
@@ -55,8 +55,8 @@ function M.run(command)
   State.file = vim.api.nvim_buf_get_name(0) -- Store original file path
   local filetype = vim.bo.filetype
   local cmd = { "prompts", command, State.file, "--filetype", filetype, "--action", "aider" }
-  vim.notify(string.format("Running command %s", command), vim.log.levels.INFO)
   State.process = vim.system(cmd, {}, on_exit(State.file))
+  require("prompts.notifier").spinner.show()
 end
 
 function M.undo()
