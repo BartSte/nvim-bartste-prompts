@@ -1,5 +1,6 @@
 local M = {}
 
+--- Holds execution context for the currently running command
 ---@class State
 ---@field lock boolean Whether a command is currently running
 ---@field command string The currently executing command name
@@ -10,7 +11,9 @@ local State = {
   command = '',
   file = '',
   file_copy = vim.fn.tempname(),
-  process = nil
+  process = nil,
+  last_stdout = '',
+  last_stderr = ''
 }
 
 --- Handles command execution cleanup and notification
@@ -19,6 +22,8 @@ local State = {
 local function on_exit(file)
   vim.fn.writefile(vim.fn.readfile(file), State.file_copy)
   return vim.schedule_wrap(function(obj)
+    State.last_stdout = obj.stdout
+    State.last_stderr = obj.stderr
     require("prompts.notifier").spinner.hide()
     State.lock = false
     if obj.code ~= 0 then
@@ -36,6 +41,9 @@ end
 --- Creates a command wrapper function for key mappings/callbacks
 ---@param command string The CLI command to execute
 ---@return fun(): nil # Function that executes the command when called
+--- Generate a closure that invokes a given CLI command.
+---@param command string The CLI command to execute
+---@return fun(): nil Function that calls M.run with the command
 function M.make(command)
   return function()
     M.run(command)
@@ -43,6 +51,9 @@ function M.make(command)
 end
 
 --- Executes a command with proper error handling and state management
+---@param command string The CLI command to execute
+---@return nil
+--- Execute the specified CLI command, manage state, and handle errors.
 ---@param command string The CLI command to execute
 ---@return nil
 function M.run(command)
@@ -59,6 +70,8 @@ function M.run(command)
   require("prompts.notifier").spinner.show()
 end
 
+--- Restore the file from its temporary backup.
+---@return nil
 function M.undo()
   if State.file_copy == '' or vim.fn.filereadable(State.file_copy) == 0 then
     vim.notify("No previous version to restore", vim.log.levels.ERROR)
@@ -75,6 +88,8 @@ function M.undo()
   vim.notify(string.format("File %s restored", vim.fn.fnamemodify(State.file, ":.")), vim.log.levels.INFO)
 end
 
+--- Determine if a command process is currently active.
+---@return boolean True if a command is running, false otherwise
 function M.is_running()
   return State.lock
 end
@@ -90,6 +105,8 @@ function M.current_file()
 end
 
 --- Aborts the currently running command, if any.
+--- Abort the active command process, if one exists.
+---@return nil
 function M.abort()
   if State.lock and State.process then
     State.process:kill()
@@ -98,6 +115,32 @@ function M.abort()
     State.command = ''
     State.file = ''
   end
+end
+
+--- Open a new buffer to display the last captured stdout.
+---@return nil
+function M.show_stdout()
+  if State.last_stdout == '' then
+    vim.notify("No stdout captured", vim.log.levels.WARN)
+    return
+  end
+  vim.cmd("tabnew")
+  local buf = vim.api.nvim_get_current_buf()
+  vim.api.nvim_buf_set_lines(buf, 0, -1, false, vim.split(State.last_stdout, "\n"))
+  vim.bo.filetype = "text"
+end
+
+--- Open a new buffer to display the last captured stderr.
+---@return nil
+function M.show_stderr()
+  if State.last_stderr == '' then
+    vim.notify("No stderr captured", vim.log.levels.WARN)
+    return
+  end
+  vim.cmd("tabnew")
+  local buf = vim.api.nvim_get_current_buf()
+  vim.api.nvim_buf_set_lines(buf, 0, -1, false, vim.split(State.last_stderr, "\n"))
+  vim.bo.filetype = "text"
 end
 
 return M
