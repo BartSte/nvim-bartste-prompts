@@ -65,7 +65,12 @@ function M.run(command)
   State.command = command
   State.file = vim.api.nvim_buf_get_name(0) -- Store original file path
   local filetype = vim.bo.filetype
-  local cmd = { "prompts", command, State.file, "--filetype", filetype, "--action", "aider" }
+  local cmd = {
+    "prompts", command, State.file,
+    "--filetype", filetype,
+    "--action", "aider",
+    "--loglevel", require("prompts").opts.loglevel,
+  }
   State.process = vim.system(cmd, {}, on_exit(State.file))
   require("prompts.notifier").spinner.show()
 end

@@ -3,6 +3,7 @@
 ---@type Opts
 local M = {
   notify = false,
+  loglevel = "WARNING"
 }
 
 --- @return Opts
