@@ -1,4 +1,5 @@
 local M = {}
+M.setup_called = false
 
 local commands = require("prompts.commands")
 local default_opts = require("prompts.opts")
@@ -44,6 +45,11 @@ end
 --- Initializes the plugin configuration
 --- @param opts table|nil Optional configuration table (currently unused)
 function M.setup(opts)
+  if M.setup_called then
+    return
+  end
+  M.setup_called = true
+
   if vim.env["AIDER_MODEL"] == nil then
     vim.notify("AIDER_MODEL environment variable not set. Aborting setup.", vim.log.levels.ERROR)
     return
