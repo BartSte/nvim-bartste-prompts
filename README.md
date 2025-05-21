@@ -9,7 +9,8 @@ refactoring, type hints, and test generation.
 - Add type hints automatically
 - Refactor code with AI suggestions
 - Fix common code issues
-- Generate unit tests
+- Generate unit tests  
+- Operate on entire files or visual selections
 - Show spinner icon with current command and file in statusline (using lualine integration)
 - Abort running command
 - Only aider is supported as AI framework for now.
@@ -56,23 +57,22 @@ require('prompts').setup({
 
 ## Commands
 
-| Command         | Description                                    | Mode   |
-| --------------- | ---------------------------------------------- | ------ |
-| `:AiDocstrings` | Generate documentation for code                | Normal |
-| `:AiTypehints`  | Add type hints automatically                   | Normal |
-| `:AiRefactor`   | Suggest refactoring improvements               | Normal |
-| `:AiFix`        | Identify and fix code issues                   | Normal |
-| `:AiTests`      | Generate unit tests for current code           | Normal |
+| Command         | Description                                    | Mode          |
+| --------------- | ---------------------------------------------- | ------------- |
+| `:AiDocstrings` | Generate documentation for code                | Normal, Visual |
+| `:AiTypehints`  | Add type hints automatically                   | Normal, Visual |
+| `:AiRefactor`   | Suggest refactoring improvements               | Normal, Visual |
+| `:AiFix`        | Identify and fix code issues                   | Normal, Visual |
+| `:AiTests`      | Generate unit tests for current code           | Normal, Visual |
 | `:AiIsRunning`  | Check if a prompt command is currently running | Normal |
 | `:AiAbort`      | Abort the currently running prompt command     | Normal |
 
 ## Usage
 
 1. Open a code file
-2. Run any `:Ai*` command
-3. Review changes in the commit that has been created.
-
-![Diff View](https://via.placeholder.com/800x400.png?text=Diff+View+Screenshot)
+2. (Optional) Select a code range in Visual mode to focus on specific code
+3. Run any `:Ai*` command
+4. Review changes in the commit that has been created.
 
 ## Contributing
 
