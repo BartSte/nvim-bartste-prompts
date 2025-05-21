@@ -13,7 +13,8 @@ local State = {
   file_copy = vim.fn.tempname(),
   process = nil,
   last_stdout = '',
-  last_stderr = ''
+  last_stderr = '',
+  userprompt = ''
 }
 
 --- Handles command execution cleanup and notification
@@ -45,18 +46,13 @@ end
 ---@param command string The CLI command to execute
 ---@return fun(): nil Function that calls M.run with the command
 function M.make(command)
-  return function()
-    M.run(command)
+  return function(opts)
+    -- Pass both the command and any range information
+    M.run(command, opts.line1, opts.line2)
   end
 end
 
---- Executes a command with proper error handling and state management
----@param command string The CLI command to execute
----@return nil
---- Execute the specified CLI command, manage state, and handle errors.
----@param command string The CLI command to execute
----@return nil
-function M.run(command)
+function M.run(command, line1, line2)
   if State.lock then
     vim.notify(string.format("Another command '%s' is already running", State.command), vim.log.levels.WARN)
   end
@@ -64,12 +60,24 @@ function M.run(command)
   State.lock = true
   State.command = command
   State.file = vim.api.nvim_buf_get_name(0) -- Store original file path
+
+  -- Capture range selection if any
+  if line1 and line2 then
+    -- Get entire lines from the range
+    local lines = vim.api.nvim_buf_get_text(0, line1 - 1, 0, line2, 0, {})
+    State.userprompt = "You MUST only edit the following piece of code:\n\n" ..
+    table.concat(lines, "\n") .. "\n\nAny other code MUST NOT be altered."
+  else
+    State.userprompt = ""
+  end
+
   local filetype = vim.bo.filetype
   local cmd = {
     "prompts", command, State.file,
     "--filetype", filetype,
     "--action", "aider",
     "--loglevel", require("prompts").opts.loglevel,
+    "--userprompt", State.userprompt
   }
   State.process = vim.system(cmd, {}, on_exit(State.file))
   require("prompts.notifier").spinner.show()

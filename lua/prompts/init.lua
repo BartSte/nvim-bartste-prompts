@@ -26,7 +26,10 @@ local function make_prompt_commands()
     { name = "AiTests",      type = "unittests" },
   }
   for _, cmd in ipairs(prompt_commands) do
-    vim.api.nvim_create_user_command(cmd.name, commands.make(cmd.type), { range = true })
+    vim.api.nvim_create_user_command(cmd.name, commands.make(cmd.type), {
+      range = true,
+      addr = "lines",  -- Explicitly handle line ranges
+    })
   end
 end
 
