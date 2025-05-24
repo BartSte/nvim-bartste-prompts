@@ -20,9 +20,7 @@ M.aider_icon = {
     if commands.is_running() then
       local frame = spinner_frames[spinner_index]
       spinner_index = spinner_index % #spinner_frames + 1
-      local cmd = commands.current_command()
-      local file = vim.fn.fnamemodify(commands.current_file(), ":t")
-      return string.format("%s %s [%s on %s]", vim.env["AIDER_MODEL"], frame, cmd, file)
+      return string.format("%s %s", vim.env["AIDER_MODEL"], frame)
     end
     spinner_index = 1
     return ""

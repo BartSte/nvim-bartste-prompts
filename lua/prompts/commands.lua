@@ -66,7 +66,7 @@ function M.run(command, line1, line2)
     -- Get entire lines from the range
     local lines = vim.api.nvim_buf_get_text(0, line1 - 1, 0, line2, 0, {})
     State.userprompt = "You MUST only edit the following piece of code:\n\n" ..
-    table.concat(lines, "\n") .. "\n\nAny other code MUST NOT be altered."
+        table.concat(lines, "\n") .. "\n\nAny other code MUST NOT be altered."
   else
     State.userprompt = ""
   end
@@ -80,7 +80,7 @@ function M.run(command, line1, line2)
     "--userprompt", State.userprompt
   }
   State.process = vim.system(cmd, {}, on_exit(State.file))
-  require("prompts.notifier").spinner.show()
+  require("prompts.notifier").spinner.show(cmd, State.file)
 end
 
 --- Restore the file from its temporary backup.
@@ -107,11 +107,6 @@ function M.is_running()
   return State.lock
 end
 
---- Returns the currently running command name, or empty string.
-function M.current_command()
-  return State.command
-end
-
 --- Returns the file path on which the current command is running, or empty string.
 function M.current_file()
   return State.file
@@ -128,32 +123,6 @@ function M.abort()
     State.command = ''
     State.file = ''
   end
-end
-
---- Open a new buffer to display the last captured stdout.
----@return nil
-function M.show_stdout()
-  if State.last_stdout == '' then
-    vim.notify("No stdout captured", vim.log.levels.WARN)
-    return
-  end
-  vim.cmd("tabnew")
-  local buf = vim.api.nvim_get_current_buf()
-  vim.api.nvim_buf_set_lines(buf, 0, -1, false, vim.split(State.last_stdout, "\n"))
-  vim.bo.filetype = "text"
-end
-
---- Open a new buffer to display the last captured stderr.
----@return nil
-function M.show_stderr()
-  if State.last_stderr == '' then
-    vim.notify("No stderr captured", vim.log.levels.WARN)
-    return
-  end
-  vim.cmd("tabnew")
-  local buf = vim.api.nvim_get_current_buf()
-  vim.api.nvim_buf_set_lines(buf, 0, -1, false, vim.split(State.last_stderr, "\n"))
-  vim.bo.filetype = "text"
 end
 
 return M

@@ -1,4 +1,3 @@
-local commands = require("prompts.commands")
 local notifier = require("snacks").notifier
 
 --- A notifier module that displays and hides a spinner notification.
@@ -21,7 +20,7 @@ M.spinner.interval = 100
 
 --- Start displaying the spinner notification.
 ---@return nil
-function M.spinner.show()
+function M.spinner.show(cmd, file)
   local opts = require("prompts").opts
   if not opts.notify then
     return
@@ -33,8 +32,6 @@ function M.spinner.show()
   M.spinner.timer:start(0, M.spinner.interval, vim.schedule_wrap(function()
     local frame = M.spinner.frames[M.spinner.index]
     M.spinner.index = M.spinner.index % #M.spinner.frames + 1
-    local cmd = commands.current_command()
-    local file = vim.fn.fnamemodify(commands.current_file(), ":t")
     local msg = string.format("%s: %s on %s", vim.env["AIDER_MODEL"], cmd, file)
     notifier.notify(msg, "info", { id = M.spinner.id, icon = frame, timeout = false })
   end))
