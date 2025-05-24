@@ -1,127 +1,69 @@
+local core = require("prompts._core")
+
 local M = {}
 
---- Holds execution context for the currently running command
----@class State
----@field lock boolean Whether a command is currently running
----@field command string The currently executing command name
----@field file string Path to the original file being processed
----@field file_copy string Temporary backup file path
-local State = {
-  lock = false,
-  command = '',
-  file = '',
-  file_copy = vim.fn.tempname(),
-  process = nil,
-  last_stdout = '',
-  last_stderr = '',
-  userprompt = ''
-}
-
---- Handles command execution cleanup and notification
----@param file string Path to the file being processed
----@return function Function to handle command completion
-local function on_exit(file)
-  vim.fn.writefile(vim.fn.readfile(file), State.file_copy)
-  return vim.schedule_wrap(function(obj)
-    State.last_stdout = obj.stdout
-    State.last_stderr = obj.stderr
-    require("prompts.notifier").spinner.hide()
-    State.lock = false
-    if obj.code ~= 0 then
-      vim.notify(string.format("Command failed with exit code: %d", obj.code), vim.log.levels.ERROR)
-      vim.notify(string.format("stderr: %s", obj.stderr), vim.log.levels.ERROR)
-      vim.notify(string.format("stdout: %s", obj.stdout), vim.log.levels.INFO)
-    elseif State.process == nil then
-      vim.notify("Command aborted", vim.log.levels.WARN)
-    else
-      vim.cmd(string.format("tabnew | e %s | diffsplit %s | set filetype=%s", file, State.file_copy, vim.bo.filetype))
-    end
-  end)
+--- Run a command with arguments on the current buffer's content
+---@param command string The shell command to execute
+---@param args table|nil Arguments to pass to the command
+function M.run(command, args)
+  local job = core.job.new(
+    command,
+    vim.api.nvim_buf_get_name(0),
+    vim.bo.filetype,
+    args
+  )
+  local cmd = core.cmd.make(job)
+  vim.fn.writefile(vim.fn.readfile(job.file), job.filecopy)
+  job.process = vim.system(cmd, core.on_exit(job))
+  require("prompts.notifier").spinner.show(job)
 end
 
---- Creates a command wrapper function for key mappings/callbacks
----@param command string The CLI command to execute
----@return fun(): nil # Function that executes the command when called
---- Generate a closure that invokes a given CLI command.
----@param command string The CLI command to execute
----@return fun(): nil Function that calls M.run with the command
-function M.make(command)
-  return function(opts)
-    -- Pass both the command and any range information
-    M.run(command, opts.line1, opts.line2)
-  end
-end
-
-function M.run(command, line1, line2)
-  if State.lock then
-    vim.notify(string.format("Another command '%s' is already running", State.command), vim.log.levels.WARN)
-  end
-
-  State.lock = true
-  State.command = command
-  State.file = vim.api.nvim_buf_get_name(0) -- Store original file path
-
-  -- Capture range selection if any
-  if line1 and line2 then
-    -- Get entire lines from the range
-    local lines = vim.api.nvim_buf_get_text(0, line1 - 1, 0, line2, 0, {})
-    State.userprompt = "You MUST only edit the following piece of code:\n\n" ..
-        table.concat(lines, "\n") .. "\n\nAny other code MUST NOT be altered."
-  else
-    State.userprompt = ""
-  end
-
-  local filetype = vim.bo.filetype
-  local cmd = {
-    "prompts", command, State.file,
-    "--filetype", filetype,
-    "--action", "aider",
-    "--loglevel", require("prompts").opts.loglevel,
-    "--userprompt", State.userprompt
-  }
-  State.process = vim.system(cmd, {}, on_exit(State.file))
-  require("prompts.notifier").spinner.show(cmd, State.file)
-end
-
---- Restore the file from its temporary backup.
+--- Restore the file to its previous state before command execution
+---@param file? string Optional path to file to restore (default: current buffer)
 ---@return nil
-function M.undo()
-  if State.file_copy == '' or vim.fn.filereadable(State.file_copy) == 0 then
+function M.undo(file)
+  file = file or vim.api.nvim_buf_get_name(0)
+  local job = core.job.get(file)
+  if job.filecopy == '' or vim.fn.filereadable(job.file_copy) == 0 then
     vim.notify("No previous version to restore", vim.log.levels.ERROR)
     return
   end
 
-  if not State.file or vim.fn.filereadable(State.file) == 0 then
+  if not job.file or vim.fn.filereadable(job.file) == 0 then
     vim.notify("Original file path is no longer valid", vim.log.levels.ERROR)
     return
   end
 
-  vim.fn.writefile(vim.fn.readfile(State.file_copy), State.file)
-  vim.cmd("e! " .. State.file)
-  vim.notify(string.format("File %s restored", vim.fn.fnamemodify(State.file, ":.")), vim.log.levels.INFO)
+  vim.fn.writefile(vim.fn.readfile(job.filecopy), job.file)
+  vim.cmd("e! " .. job.file)
+  vim.notify(string.format("File %s restored", vim.fn.fnamemodify(job.file, ":.")), vim.log.levels.INFO)
 end
 
---- Determine if a command process is currently active.
----@return boolean True if a command is running, false otherwise
-function M.is_running()
-  return State.lock
+--- Check if there's an active job for the given file
+---@param file? string Optional path to check (default: current buffer)
+---@return boolean
+function M.is_running(file)
+  file = file or vim.api.nvim_buf_get_name(0)
+  return core.job.get(file) ~= nil
 end
 
---- Returns the file path on which the current command is running, or empty string.
-function M.current_file()
-  return State.file
-end
-
---- Aborts the currently running command, if any.
---- Abort the active command process, if one exists.
+--- Abort any running job for the given file
+---@param file? string Optional path to check (default: current buffer)
 ---@return nil
-function M.abort()
-  if State.lock and State.process then
-    State.process:kill()
-    State.lock = false
-    State.process = nil
-    State.command = ''
-    State.file = ''
+function M.abort(file)
+  file = file or vim.api.nvim_buf_get_name(0)
+  local job = core.job.get(file)
+  if not job or not job.process then
+    vim.notify("No job to abort for this file", vim.log.levels.ERROR)
+    return
+  end
+
+  if job.process then
+    job.process:kill()
+    job.lock = false
+    job.process = nil
+    job.command = ''
+    job.file = ''
   end
 end
 

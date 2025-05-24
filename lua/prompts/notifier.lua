@@ -1,4 +1,5 @@
 local notifier = require("snacks").notifier
+local opts = require("prompts._core.opts")
 
 --- A notifier module that displays and hides a spinner notification.
 ---@module prompts.notifier
@@ -18,11 +19,12 @@ M.spinner.id = "aider_prompt"
 M.spinner.timer = nil
 M.spinner.interval = 100
 
---- Start displaying the spinner notification.
+--- Starts and updates a spinner notification for an active job.
+--- Checks notify option before creating timer.
+---@param job Job The job instance associated with the spinner
 ---@return nil
-function M.spinner.show(cmd, file)
-  local opts = require("prompts").opts
-  if not opts.notify then
+function M.spinner.show(job)
+  if not opts.get().notify then
     return
   end
   if M.spinner.timer then
@@ -32,16 +34,17 @@ function M.spinner.show(cmd, file)
   M.spinner.timer:start(0, M.spinner.interval, vim.schedule_wrap(function()
     local frame = M.spinner.frames[M.spinner.index]
     M.spinner.index = M.spinner.index % #M.spinner.frames + 1
-    local msg = string.format("%s: %s on %s", vim.env["AIDER_MODEL"], cmd, file)
+    local filename = vim.fn.fnamemodify(vim.fn.expand(job.file), ":t")
+    local msg = string.format("%s: %s on %s", vim.env["AIDER_MODEL"], job.command, filename)
     notifier.notify(msg, "info", { id = M.spinner.id, icon = frame, timeout = false })
   end))
 end
 
---- Stop and hide the spinner notification, resetting its state.
+--- Stops and hides the spinner notification.
+--- Resets timer and animation state. Safe to call even when inactive.
 ---@return nil
 function M.spinner.hide()
-  local opts = require("prompts").opts
-  if not opts.notify then
+  if not opts.get().notify then
     return
   end
   if M.spinner.timer then
