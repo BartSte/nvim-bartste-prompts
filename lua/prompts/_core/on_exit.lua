@@ -1,4 +1,5 @@
 local jobs = require("prompts._core.job")
+local helpers = require("prompts._core.helpers")
 
 ---Handle command exit status and cleanup
 ---@param job prompts.Job
@@ -11,7 +12,9 @@ return function(job)
       vim.notify(string.format("stderr: %s", obj.stderr), vim.log.levels.ERROR)
       vim.notify(string.format("stdout: %s", obj.stdout), vim.log.levels.INFO)
     else
-      vim.cmd(string.format("tabnew | e %s | diffsplit %s | set filetype=%s", job.file, job.filecopy, job.filetype))
+      if helpers.diff(job.file, job.filecopy) then
+        vim.cmd(string.format("tabnew | e %s | diffsplit %s | set filetype=%s", job.file, job.filecopy, job.filetype))
+      end
       jobs.delete(job.file)
     end
   end)

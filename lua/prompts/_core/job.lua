@@ -26,6 +26,10 @@ local jobs = {}
 ---@param args table Arguments containing line range (line1, line2, range)
 ---@return prompts.Job? job Initialized job instance or nil if conflict exists
 function M.new(command, file, filetype, args)
+  if jobs[file] ~= nil then
+    return nil
+  end
+
   local job = {
     command = command,
     file = file,
@@ -34,10 +38,6 @@ function M.new(command, file, filetype, args)
     process = nil,
     userprompt = userprompt.new(args.line1, args.line2, args.range),
   }
-  if jobs[file] ~= nil then
-    vim.notify("A job is already running for file " .. file, vim.log.levels.ERROR)
-    return nil
-  end
   jobs[file] = job
   return job
 end
