@@ -6,12 +6,13 @@ local M = {}
 ---@param command string The shell command to execute
 ---@param args table|nil Arguments to pass to the command
 function M.run(command, args)
-  local job = core.job.new(
-    command,
-    vim.api.nvim_buf_get_name(0),
-    vim.bo.filetype,
-    args
-  )
+  local file = vim.api.nvim_buf_get_name(0)
+  local job = core.job.new(command, file, vim.bo.filetype, args)
+  if not job then
+    vim.notify("A job is already running for file " .. file, vim.log.levels.ERROR)
+    return
+  end
+
   local cmd = core.cmd.make(job)
   vim.fn.writefile(vim.fn.readfile(job.file), job.filecopy)
   job.process = vim.system(cmd, core.on_exit(job))
@@ -26,7 +27,7 @@ function M.undo(file)
     file = vim.api.nvim_buf_get_name(0)
   end
   local job = core.job.get(file)
-  if job.filecopy == '' or vim.fn.filereadable(job.file_copy) == 0 then
+  if job==nil or job.filecopy == '' or vim.fn.filereadable(job.filecopy) == 0 then
     vim.notify("No previous version to restore", vim.log.levels.ERROR)
     return
   end
