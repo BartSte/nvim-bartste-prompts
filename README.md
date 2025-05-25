@@ -13,6 +13,7 @@ refactoring, type hints, and test generation.
 - Operate on entire files or visual selections
 - Show spinner icon with current command and file in statusline (using lualine integration)
 - Abort running command
+- Undo the last AI-generated change
 - Only aider is supported as AI framework for now.
 
 ## Installation
@@ -66,6 +67,7 @@ require('prompts').setup({
 | `:AiTests`      | Generate unit tests for current code           | Normal, Visual |
 | `:AiIsRunning`  | Check if a prompt command is currently running | Normal |
 | `:AiAbort`      | Abort the currently running prompt command     | Normal |
+| `:AiUndo`       | Undo the last AI-generated change              | Normal |
 
 ## Usage
 
