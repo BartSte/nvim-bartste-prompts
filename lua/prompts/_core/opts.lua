@@ -14,13 +14,13 @@ local opts = {
 }
 
 --- Update configuration options with a deep merge
----@param new table Table of new options to merge into current configuration
+---@param new prompts.Opts Table of new options to merge into current configuration
 function M.update(new)
   opts = vim.tbl_deep_extend("force", opts, new)
 end
 
 --- Retrieve current configuration options
----@return table Table containing current configuration settings
+---@return prompts.Opts Table containing current configuration settings
 function M.get()
   return opts
 end

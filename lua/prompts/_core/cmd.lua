@@ -1,6 +1,6 @@
 local M = {}
 
----@type prompts.Opts
+---@type prompts.GlobalOptions
 local opts = require("prompts._core.opts")
 
 ---Build command table for job execution
