@@ -12,7 +12,7 @@ local spinner_index = 1
 local M = {}
 
 --- Lualine component for the Aider prompt spinner and command info.
----@type table[]
+---@type table<function>
 M.aider_icon = {
   --- Generates the formatted component string for lualine.
   ---@return string the formatted segment or empty if no command is running.

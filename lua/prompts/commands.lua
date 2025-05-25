@@ -4,7 +4,7 @@ local M = {}
 
 --- Run a command with arguments on the current buffer's content
 ---@param command string The shell command to execute
----@param args table|nil Arguments to pass to the command
+---@param args? vim.api.keyset.create_user_command.command_args The command arguments passed in the user command
 function M.run(command, args)
   local file = vim.api.nvim_buf_get_name(0)
   local job = core.job.new(command, file, vim.bo.filetype, args)
@@ -27,7 +27,7 @@ function M.undo(file)
     file = vim.api.nvim_buf_get_name(0)
   end
   local job = core.job.get(file)
-  if job==nil or job.filecopy == '' or vim.fn.filereadable(job.filecopy) == 0 then
+  if job == nil or job.filecopy == '' or vim.fn.filereadable(job.filecopy) == 0 then
     vim.notify("No previous version to restore", vim.log.levels.ERROR)
     return
   end
