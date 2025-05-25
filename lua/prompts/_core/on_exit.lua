@@ -5,7 +5,7 @@ local jobs = require("prompts._core.job")
 ---@return fun(...)
 return function(job)
   return vim.schedule_wrap(function(obj)
-    require("prompts.notifier").spinner.hide()
+    require("prompts.notifier").spinner.hide(job)
     if obj.code ~= 0 then
       vim.notify(string.format("Command failed with exit code: %d", obj.code), vim.log.levels.ERROR)
       vim.notify(string.format("stderr: %s", obj.stderr), vim.log.levels.ERROR)
