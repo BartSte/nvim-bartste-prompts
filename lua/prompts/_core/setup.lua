@@ -24,9 +24,7 @@ local function make_prompt_commands()
     { name = "AiTests",      type = "unittests" },
   }
   for _, cmd in ipairs(prompt_commands) do
-    vim.api.nvim_create_user_command(cmd.name, make_command(cmd.type), {
-      range = true,
-    })
+    vim.api.nvim_create_user_command(cmd.name, make_command(cmd.type), { range = true })
   end
 end
 
@@ -72,5 +70,3 @@ return function(opts)
   check_executables()
   make_commands()
 end
-
-

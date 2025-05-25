@@ -22,7 +22,9 @@ end
 ---@param file? string Optional path to file to restore (default: current buffer)
 ---@return nil
 function M.undo(file)
-  file = file or vim.api.nvim_buf_get_name(0)
+  if type(file) ~= "string" then
+    file = vim.api.nvim_buf_get_name(0)
+  end
   local job = core.job.get(file)
   if job.filecopy == '' or vim.fn.filereadable(job.file_copy) == 0 then
     vim.notify("No previous version to restore", vim.log.levels.ERROR)
@@ -43,7 +45,9 @@ end
 ---@param file? string Optional path to check (default: current buffer)
 ---@return boolean
 function M.is_running(file)
-  file = file or vim.api.nvim_buf_get_name(0)
+  if type(file) ~= "string" then
+    file = vim.api.nvim_buf_get_name(0)
+  end
   return core.job.get(file) ~= nil
 end
 
@@ -51,7 +55,9 @@ end
 ---@param file? string Optional path to check (default: current buffer)
 ---@return nil
 function M.abort(file)
-  file = file or vim.api.nvim_buf_get_name(0)
+  if type(file) ~= "string" then
+    file = vim.api.nvim_buf_get_name(0)
+  end
   local job = core.job.get(file)
   if not job or not job.process then
     vim.notify("No job to abort for this file", vim.log.levels.ERROR)
@@ -60,10 +66,6 @@ function M.abort(file)
 
   if job.process then
     job.process:kill()
-    job.lock = false
-    job.process = nil
-    job.command = ''
-    job.file = ''
   end
 end
 

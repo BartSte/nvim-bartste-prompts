@@ -12,7 +12,7 @@ return function(job)
       vim.notify(string.format("stdout: %s", obj.stdout), vim.log.levels.INFO)
     else
       vim.cmd(string.format("tabnew | e %s | diffsplit %s | set filetype=%s", job.file, job.filecopy, job.filetype))
-      jobs.delete(job)
+      jobs.delete(job.file)
     end
   end)
 end
