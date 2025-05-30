@@ -3,7 +3,7 @@
 ---@field command string Shell command to execute with placeholder substitution
 ---@field file string Absolute path to source file being processed
 ---@field filetype string Filetype for syntax highlighting/processing
----@field filecopy string Temporary file path used for processing operations
+---@field tmp string Temporary file path used for processing operations
 ---@field process table|nil Job process handle from vim.fn.jobstart
 ---@field userprompt string User-provided input captured from prompt dialog
 
@@ -34,8 +34,8 @@ function M.new(command, file, filetype, args)
     command = command,
     file = file,
     filetype = filetype,
-    filecopy = vim.fn.tempname(),
     process = nil,
+    tmp = vim.fn.tempname(),
     userprompt = userprompt.new(args.line1, args.line2, args.range),
   }
   jobs[file] = job

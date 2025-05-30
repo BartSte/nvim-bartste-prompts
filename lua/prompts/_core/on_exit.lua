@@ -22,8 +22,8 @@ function M.edit(job)
       vim.notify(string.format("stderr: %s", obj.stderr), vim.log.levels.ERROR)
       vim.notify(string.format("stdout: %s", obj.stdout), vim.log.levels.INFO)
     else
-      if helpers.diff(job.file, job.filecopy) then
-        vim.cmd(string.format("tabnew | e %s | diffsplit %s | set filetype=%s", job.file, job.filecopy, job.filetype))
+      if helpers.diff(job.file, job.tmp) then
+        vim.cmd(string.format("tabnew | e %s | diffsplit %s | set filetype=%s", job.file, job.tmp, job.filetype))
       end
       jobs.delete(job.file)
     end
@@ -39,7 +39,16 @@ function M.output(job)
     if obj.code ~= 0 then
       vim.notify(string.format("Explain failed: %s", obj.stderr), vim.log.levels.ERROR)
     else
-      vim.notify(obj.stdout, vim.log.levels.INFO)
+      local f = io.open(job.tmp, "w")
+      if f then
+        f:write(obj.stdout)
+        f:close()
+      else
+        vim.notify("Could not open tmp file for writing", vim.log.levels.ERROR)
+      end
+      vim.cmd(string.format(
+        "tabnew | e %s | set filetype=markdown | vert new %s | set filetype=%s", job.tmp, job.file, job.filetype
+      ))
     end
     jobs.delete(job.file)
   end)

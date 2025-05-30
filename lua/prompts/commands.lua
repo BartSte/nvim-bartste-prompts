@@ -24,7 +24,7 @@ function M.undo(file)
     file = vim.api.nvim_buf_get_name(0)
   end
   local job = core.job.get(file)
-  if job == nil or job.filecopy == '' or vim.fn.filereadable(job.filecopy) == 0 then
+  if job == nil or job.tmp == '' or vim.fn.filereadable(job.tmp) == 0 then
     vim.notify("No previous version to restore", vim.log.levels.ERROR)
     return
   end
@@ -34,7 +34,7 @@ function M.undo(file)
     return
   end
 
-  vim.fn.writefile(vim.fn.readfile(job.filecopy), job.file)
+  vim.fn.writefile(vim.fn.readfile(job.tmp), job.file)
   vim.cmd("e! " .. job.file)
   vim.notify(string.format("File %s restored", vim.fn.fnamemodify(job.file, ":.")), vim.log.levels.INFO)
 end

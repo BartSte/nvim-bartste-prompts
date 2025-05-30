@@ -29,7 +29,7 @@ return function(command, args, on_exit)
 
   if job then
     local file_content =  vim.fn.readfile(file)
-    vim.fn.writefile(file_content, job.filecopy)
+    vim.fn.writefile(file_content, job.tmp)
 
     local cmd = make_cmd(job)
     on_exit = on_exit or core.on_exit.default
