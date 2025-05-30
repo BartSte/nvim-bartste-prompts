@@ -1,10 +1,20 @@
 local jobs = require("prompts._core.job")
 local helpers = require("prompts._core.helpers")
+local notifier = require("prompts.notifier").spinner
 
----Handle command exit status and cleanup
----@param job prompts.Job
----@return fun(...)
-return function(job)
+local M = {}
+
+---Create a default exit handler that hides the spinner on completion.
+---@param job prompts.Job The job to handle.
+---@return fun(...):void Handler function to hide the spinner.
+function M.default(job)
+  return function(...) notifier.hide(job) end
+end
+
+---Handle command exit status and cleanup for the "prompts.edit" command.
+---@param job prompts.Job The job object representing the edit operation.
+---@return fun(...):void A wrapped function invoked on command exit.
+function M.edit(job)
   return vim.schedule_wrap(function(obj)
     require("prompts.notifier").spinner.hide(job)
     if obj.code ~= 0 then
@@ -19,3 +29,20 @@ return function(job)
     end
   end)
 end
+
+---Handle command exit status and cleanup for the "prompts.output" command.
+---@param job prompts.Job The job object representing the output command.
+---@return fun(...):void A function invoked on command exit and cleanup.
+function M.output(job)
+  return vim.schedule_wrap(function(obj)
+    notifier.hide(job)
+    if obj.code ~= 0 then
+      vim.notify(string.format("Explain failed: %s", obj.stderr), vim.log.levels.ERROR)
+    else
+      vim.notify(obj.stdout, vim.log.levels.INFO)
+    end
+    jobs.delete(job.file)
+  end)
+end
+
+return M

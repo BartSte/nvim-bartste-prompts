@@ -1,4 +1,5 @@
 local global_opts = require("prompts._core.opts")
+local run = require("prompts._core.run")
 
 local setup_called = false
 
@@ -6,9 +7,7 @@ local setup_called = false
 ---@param command string The prompt type to handle (e.g. "docstrings", "refactor")
 ---@return function Command handler function for Neovim API
 local function make_command(command)
-  return function(args)
-    require("prompts.commands").run(command, args)
-  end
+  return function(args) run(command, args) end
 end
 
 --- Creates user commands for different AI prompt types

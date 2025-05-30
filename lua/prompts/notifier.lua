@@ -21,7 +21,7 @@ M.spinner.id = "aider_prompt_jobs"
 
 --- Starts and updates a spinner notification for an active job.
 --- Checks notify option before creating timer.
----@param job Job The job instance associated with the spinner
+---@param job prompts.Job The job instance associated with the spinner
 ---@return nil
 function M.spinner.show(job)
   if not opts.get().notify then

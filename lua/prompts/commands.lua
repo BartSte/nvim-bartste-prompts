@@ -2,21 +2,18 @@ local core = require("prompts._core")
 
 local M = {}
 
---- Run a command with arguments on the current buffer's content
+--- Run a command that will apply modifications to the current buffer
 ---@param command string The shell command to execute
 ---@param args? vim.api.keyset.create_user_command.command_args The command arguments passed in the user command
-function M.run(command, args)
-  local file = vim.api.nvim_buf_get_name(0)
-  local job = core.job.new(command, file, vim.bo.filetype, args)
-  if not job then
-    vim.notify("A job is already running for file " .. file, vim.log.levels.ERROR)
-    return
-  end
+function M.edit(command, args)
+  core.run(command, args, core.on_exit.edit)
+end
 
-  local cmd = core.cmd.make(job)
-  vim.fn.writefile(vim.fn.readfile(job.file), job.filecopy)
-  job.process = vim.system(cmd, core.on_exit(job))
-  require("prompts.notifier").spinner.show(job)
+--- Run a command that generates output to stdout about the current buffer
+---@param command string The shell command to execute
+---@param args? vim.api.keyset.create_user_command.command_args The command arguments passed in the user command
+function M.output(command, args)
+  core.run(command, args, core.on_exit.output)
 end
 
 --- Restore the file to its previous state before command execution

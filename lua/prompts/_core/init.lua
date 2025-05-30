@@ -1,7 +1,7 @@
 --- Core module that should not be used outside of this package.
 ---@class prompts.Core
 local M = {
-  cmd = require("prompts._core.cmd"),
+  run = require("prompts._core.run"),
   job = require("prompts._core.job"),
   on_exit = require("prompts._core.on_exit"),
   userprompt = require("prompts._core.userprompt"),
