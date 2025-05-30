@@ -1,13 +1,13 @@
 local M = {}
 
 local TEMPLATE = [[
-You MUST only edit the following piece of code:
+You MUST only consider the following piece of code:
 
 ```
 %s
 ```
 
-Any other code MUST NOT be altered.
+Any other code MUST be ignored.
 ]]
 
 ---Create a user prompt template for code editing
