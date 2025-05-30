@@ -6,8 +6,8 @@ local setup_called = false
 --- Creates a Neovim user command handler for a specific prompt type
 ---@param command string The prompt type to handle (e.g. "docstrings", "refactor")
 ---@return function Command handler function for Neovim API
-local function make_command(command)
-  return function(args) run(command, args) end
+local function make_command(command, type)
+  return function(args) require("prompts.commands")[type](command, args) end
 end
 
 --- Creates user commands for different AI prompt types
@@ -16,14 +16,15 @@ end
 local function make_prompt_commands()
   ---@table List of AI prompt command definitions
   local prompt_commands = {
-    { name = "AiDocstrings", type = "docstrings" },
-    { name = "AiTypehints",  type = "typehints" },
-    { name = "AiRefactor",   type = "refactor" },
-    { name = "AiFix",        type = "fix" },
-    { name = "AiTests",      type = "unittests" },
+    { command = "AiDocstrings", type = "edit",   prompt = "docstrings" },
+    { command = "AiTypehints",  type = "edit",   prompt = "typehints" },
+    { command = "AiRefactor",   type = "edit",   prompt = "refactor" },
+    { command = "AiExplain",    type = "output", prompt = "explain" },
+    { command = "AiFix",        type = "edit",   prompt = "fix" },
+    { command = "AiTests",      type = "edit",   prompt = "unittests" },
   }
   for _, cmd in ipairs(prompt_commands) do
-    vim.api.nvim_create_user_command(cmd.name, make_command(cmd.type), { range = true })
+    vim.api.nvim_create_user_command(cmd.command, make_command(cmd.prompt, cmd.type), { range = true })
   end
 end
 

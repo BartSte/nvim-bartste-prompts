@@ -16,7 +16,7 @@ end
 ---@return fun(...):void A wrapped function invoked on command exit.
 function M.edit(job)
   return vim.schedule_wrap(function(obj)
-    require("prompts.notifier").spinner.hide(job)
+    notifier.hide(job)
     if obj.code ~= 0 then
       vim.notify(string.format("Command failed with exit code: %d", obj.code), vim.log.levels.ERROR)
       vim.notify(string.format("stderr: %s", obj.stderr), vim.log.levels.ERROR)
