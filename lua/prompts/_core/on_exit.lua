@@ -8,7 +8,7 @@ local M = {}
 ---@param job prompts.Job The job to handle.
 ---@return fun(...):void Handler function to hide the spinner.
 function M.default(job)
-  return function(...) notifier.hide(job) end
+  return vim.schedule_wrap(function(...) notifier.hide(job) end)
 end
 
 ---Handle command exit status and cleanup for the "prompts.edit" command.
