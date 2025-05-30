@@ -32,8 +32,8 @@ return function(command, args, on_exit)
     vim.fn.writefile(file_content, job.filecopy)
 
     local cmd = make_cmd(job)
-    on_exit = on_exit or core.on_exit.default(job)
-    job.process = vim.system(cmd, on_exit)
+    on_exit = on_exit or core.on_exit.default
+    job.process = vim.system(cmd, on_exit(job))
     notifier.spinner.show(job)
 
   else

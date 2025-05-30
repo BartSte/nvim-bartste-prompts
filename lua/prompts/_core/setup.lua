@@ -40,12 +40,13 @@ end
 
 --- Verifies required executables are present in PATH
 --- Checks for 'prompts' and 'aider' binaries
----@return boolean|nil Returns nil if checks fail, shows error notification
+---@return boolean Result Returns true if all required executables are found, false otherwise
 local function check_executables()
-  if vim.fn.executable("prompts") == 0 or vim.fn.executable("aider") == 0 then
+  local result = vim.fn.executable("prompts") == 1 and vim.fn.executable("aider") == 1
+  if not result then
     vim.notify("Missing required executables: 'prompts' and/or 'aider' must be in PATH", vim.log.levels.ERROR)
-    return
   end
+  return result
 end
 
 --- Initializes the plugin setup and configuration
@@ -67,6 +68,8 @@ return function(opts)
   opts = opts or {}
   global_opts.update(opts)
   vim.env["AIDER_AUTO_COMMITS"] = "False"
-  check_executables()
+  if not check_executables() then
+    return
+  end
   make_commands()
 end

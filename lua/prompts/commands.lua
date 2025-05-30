@@ -64,6 +64,8 @@ function M.abort(file)
 
   if job.process then
     job.process:kill()
+    require("prompts.notifier").spinner.hide(job)
+    core.job.delete(file)
   end
 end
 
