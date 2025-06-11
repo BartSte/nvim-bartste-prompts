@@ -47,12 +47,14 @@ example, using `lazy.nvim`:
 The `setup()` function accepts the following options:
 
 - `notify` (boolean): Whether to show spinner notification after AI commands complete. Default: `false`.
+- `backup_dir` (string): Directory path where backups are stored. Default: `vim.fn.stdpath("cache") .. "/prompts_backup"`.
 
 Example:
 
 ```lua
 require('prompts').setup({
   notify = true,
+  backup_dir = vim.fn.stdpath("cache") .. "/prompts_backup",
 })
 ```
 
