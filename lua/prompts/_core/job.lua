@@ -15,6 +15,7 @@
 local M = {}
 
 local userprompt = require("prompts._core.userprompt")
+local opts = require("prompts._core.opts")
 
 ---@type table<string, prompts.Job>
 local jobs = {}
@@ -30,12 +31,14 @@ function M.new(command, file, filetype, args)
     return nil
   end
 
+  local basename = vim.fn.fnamemodify(file, ":t")
+  local hash = vim.fn.sha256(vim.fn.fnamemodify(file, ":p")):sub(1,8)
   local job = {
     command = command,
     file = file,
     filetype = filetype,
     process = nil,
-    tmp = vim.fn.tempname(),
+    tmp = string.format("%s/%s-%s", opts.get().backup_dir, hash, basename),
     userprompt = userprompt.new(args.line1, args.line2, args.range),
   }
   jobs[file] = job

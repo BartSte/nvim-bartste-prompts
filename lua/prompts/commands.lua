@@ -1,4 +1,5 @@
 local core = require("prompts._core")
+local opts = require("prompts._core.opts")
 
 local M = {}
 
@@ -23,20 +24,19 @@ function M.undo(file)
   if type(file) ~= "string" then
     file = vim.api.nvim_buf_get_name(0)
   end
-  local job = core.job.get(file)
-  if job == nil or job.tmp == '' or vim.fn.filereadable(job.tmp) == 0 then
-    vim.notify("No previous version to restore", vim.log.levels.ERROR)
-    return
+  local backup_dir = opts.get().backup_dir
+  local abs = vim.fn.fnamemodify(file, ":p")
+  local hash = vim.fn.sha256(abs):sub(1,8)
+  local basename = vim.fn.fnamemodify(file, ":t")
+  local tmp = string.format("%s/%s-%s", backup_dir, hash, basename)
+
+  if vim.fn.filereadable(tmp) == 0 then
+    return vim.notify("No previous version to restore", vim.log.levels.ERROR)
   end
 
-  if not job.file or vim.fn.filereadable(job.file) == 0 then
-    vim.notify("Original file path is no longer valid", vim.log.levels.ERROR)
-    return
-  end
-
-  vim.fn.writefile(vim.fn.readfile(job.tmp), job.file)
-  vim.cmd("e! " .. job.file)
-  vim.notify(string.format("File %s restored", vim.fn.fnamemodify(job.file, ":.")), vim.log.levels.INFO)
+  vim.fn.writefile(vim.fn.readfile(tmp), file)
+  vim.cmd("e! " .. file)
+  vim.notify(string.format("Restored %s from backup", basename), vim.log.levels.INFO)
 end
 
 --- Check if there's an active job for the given file

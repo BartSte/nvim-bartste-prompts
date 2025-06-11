@@ -1,7 +1,11 @@
 local global_opts = require("prompts._core.opts")
-local run = require("prompts._core.run")
 
 local setup_called = false
+
+--- Initialize job module by creating the backup directory
+local function make_backup_dir()
+  vim.fn.mkdir(global_opts.get().backup_dir, "p")
+end
 
 --- Creates a Neovim user command handler for a specific prompt type
 ---@param command string The prompt type to handle (e.g. "docstrings", "refactor")
@@ -71,5 +75,6 @@ return function(opts)
   if not check_executables() then
     return
   end
+  make_backup_dir()
   make_commands()
 end

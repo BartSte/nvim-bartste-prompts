@@ -7,10 +7,12 @@ local M = {}
 ---@field notify boolean? Whether to show notifications
 ---@field loglevel string? The log level
 ---@field timeout_seconds integer? The default timeout in seconds
+---@field backup_dir string? Directory path where backups are stored
 local opts = {
   notify = false,
   loglevel = "WARNING",
-  timeout_seconds = 1200
+  timeout_seconds = 1200,
+  backup_dir = vim.fn.stdpath("cache") .. "/prompts_backup"
 }
 
 --- Update configuration options with a deep merge
