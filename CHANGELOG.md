@@ -9,8 +9,24 @@ user. A change is always categorized based on the following types:
 - Improvement: a functionality in the software is improved.
 - Breaking Change: a change that breaks backward compatibility.
 
-## 0.2.0 - 2025-05-20
+## 1.0.0 - 2025-06-18
+
+### Breaking Change
+
+- made compatible with bartste-prompts 1.0
+
 ### Features
+
+- Write output to markdown temp file and open it correctly in new tabs
+
+### Improvements
+
+- Made prompt more generic
+
+## 0.2.0 - 2025-05-20
+
+### Features
+
 - Add visual selection range support for prompt commands
 - Implement --loglevel option for command execution
 - Add AiStdOut/AiStdErr commands to show command output
@@ -20,9 +36,10 @@ user. A change is always categorized based on the following types:
 - Introduce lualine running indicator component
 
 ## 0.1.0 - 2025-04-12
+
 ### Features
+
 - Initial plugin setup with AI command integration
 - Non-blocking async command execution
 - Automatic diff view after changes
 - Executable validation before setup
-
