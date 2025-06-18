@@ -4,11 +4,12 @@
 local function make_cmd(job)
   local core = require("prompts._core")
   return {
-    "prompts", job.command, job.file,
+    "prompts", job.command,
+    "--files", job.file,
     "--filetype", job.filetype,
-    "--action", "aider",
     "--loglevel", core.opts.get().loglevel,
-    "--userprompt", job.userprompt
+    "--user", job.userprompt,
+    "--action", job.action
   }
 end
 
@@ -17,25 +18,25 @@ end
 ---
 ---@param command string The command to dispatch to the prompts CLI
 ---@param args string[] List of arguments to pass to the job
+---@param action string The `prompts <command> --action <action>` value.
 ---@param on_exit fun(job: prompts.Job)? Optional callback invoked upon job completion
 ---@return nil
-return function(command, args, on_exit)
+return function(command, args, action, on_exit)
   local core = require("prompts._core")
   local notifier = require("prompts.notifier")
-  local file =vim.api.nvim_buf_get_name(0)
+  local file = vim.api.nvim_buf_get_name(0)
   local filetype = vim.bo.filetype
 
-  local job = core.job.new(command, file, filetype, args)
+  local job = core.job.new(command, file, filetype, action, args)
 
   if job then
-    local file_content =  vim.fn.readfile(file)
+    local file_content = vim.fn.readfile(file)
     vim.fn.writefile(file_content, job.tmp)
 
     local cmd = make_cmd(job)
     on_exit = on_exit or core.on_exit.default
     job.process = vim.system(cmd, on_exit(job))
     notifier.spinner.show(job)
-
   else
     vim.notify("A job is already running for file " .. file, vim.log.levels.ERROR)
   end

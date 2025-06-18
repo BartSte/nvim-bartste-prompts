@@ -7,14 +7,14 @@ local M = {}
 ---@param command string The shell command to execute
 ---@param args? vim.api.keyset.create_user_command.command_args The command arguments passed in the user command
 function M.edit(command, args)
-  core.run(command, args, core.on_exit.edit)
+  core.run(command, args, "aider-code", core.on_exit.edit)
 end
 
 --- Run a command that generates output to stdout about the current buffer
 ---@param command string The shell command to execute
 ---@param args? vim.api.keyset.create_user_command.command_args The command arguments passed in the user command
 function M.output(command, args)
-  core.run(command, args, core.on_exit.output)
+  core.run(command, args, "aider-ask", core.on_exit.output)
 end
 
 --- Restore the file to its previous state before command execution

@@ -39,7 +39,8 @@ function M.output(job)
     if obj.code ~= 0 then
       vim.notify(string.format("Explain failed: %s", obj.stderr), vim.log.levels.ERROR)
     else
-      local f = io.open(job.tmp, "w")
+      local markdown_tmp = job.tmp .. ".md"
+      local f = io.open(markdown_tmp, "w")
       if f then
         f:write(obj.stdout)
         f:close()
@@ -47,7 +48,7 @@ function M.output(job)
         vim.notify("Could not open tmp file for writing", vim.log.levels.ERROR)
       end
       vim.cmd(string.format(
-        "tabnew | e %s | set filetype=markdown | vert new %s | set filetype=%s", job.tmp, job.file, job.filetype
+        "tabnew | e %s | set filetype=markdown | vert new %s | set filetype=%s", markdown_tmp, job.file, job.filetype
       ))
     end
     jobs.delete(job.file)

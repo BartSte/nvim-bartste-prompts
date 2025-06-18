@@ -4,12 +4,13 @@
 ---@field file string Absolute path to source file being processed
 ---@field filetype string Filetype for syntax highlighting/processing
 ---@field tmp string Temporary file path used for processing operations
+---@field action string the <value> for `prompt <command> --action <value>`.
 ---@field process table|nil Job process handle from vim.fn.jobstart
 ---@field userprompt string User-provided input captured from prompt dialog
 
 ---@class prompts.Jobs
 ---Manages collection of active prompt jobs with file-based indexing
----@field new fun(command: string, file: string, filetype: string, args: table): prompts.Job|nil Create and track new job
+---@field new fun(command: string, file: string, filetype: string, action: string, args: table): prompts.Job|nil Create and track new job
 ---@field get fun(file: string): prompts.Job|nil Get job by source file path
 ---@field delete fun(file: string): nil Remove job tracking and cleanup
 local M = {}
@@ -24,19 +25,21 @@ local jobs = {}
 ---@param command string Shell command template with placeholders
 ---@param file string Absolute path to source file being processed
 ---@param filetype string Filetype for syntax-aware processing
+---@param action string the <value> for `prompt <command> --action <value>`.
 ---@param args table Arguments containing line range (line1, line2, range)
 ---@return prompts.Job? job Initialized job instance or nil if conflict exists
-function M.new(command, file, filetype, args)
+function M.new(command, file, filetype, action, args)
   if jobs[file] ~= nil then
     return nil
   end
 
   local basename = vim.fn.fnamemodify(file, ":t")
-  local hash = vim.fn.sha256(vim.fn.fnamemodify(file, ":p")):sub(1,8)
+  local hash = vim.fn.sha256(vim.fn.fnamemodify(file, ":p")):sub(1, 8)
   local job = {
     command = command,
     file = file,
     filetype = filetype,
+    action = action,
     process = nil,
     tmp = string.format("%s/%s-%s", opts.get().backup_dir, hash, basename),
     userprompt = userprompt.new(args.line1, args.line2, args.range),
