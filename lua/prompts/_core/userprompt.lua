@@ -12,6 +12,7 @@
 local M = {}
 
 local TEMPLATE_SELECTION = [[
+
 You MUST only consider the following piece of code:
 
 ```
@@ -29,6 +30,9 @@ function M.make_selection(args)
   return string.format(TEMPLATE_SELECTION, table.concat(lines, "\n"))
 end
 
+---Extract the request string from the command arguments.
+---@param args UserCommandArgs The arguments passed to the user command
+---@return string The raw request string, or an empty string if none
 function M.make_request(args)
   return args.args or ''
 end

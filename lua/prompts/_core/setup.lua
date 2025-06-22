@@ -2,7 +2,6 @@ local global_opts = require("prompts._core.opts")
 
 local setup_called = false
 
---- Initialize job module by creating the backup directory
 local function make_backup_dir()
   vim.fn.mkdir(global_opts.get().backup_dir, "p")
 end
@@ -28,7 +27,7 @@ local function make_prompt_commands()
     { command = "AiTests",      type = "edit",   prompt = "unittests" },
   }
   for _, cmd in ipairs(prompt_commands) do
-    vim.api.nvim_create_user_command(cmd.command, make_command(cmd.prompt, cmd.type), { range = true })
+    vim.api.nvim_create_user_command(cmd.command, make_command(cmd.prompt, cmd.type), { range = true, nargs = '*' })
   end
 end
 
