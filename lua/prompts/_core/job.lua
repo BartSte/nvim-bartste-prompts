@@ -45,7 +45,7 @@ function M.new(command, file, filetype, action, args)
     action = action,
     process = nil,
     tmp = string.format("%s/%s-%s", opts.get().backup_dir, hash, basename),
-    userprompt = userprompt.new(args.line1, args.line2, args.range),
+    userprompt = userprompt.new(args),
     buffer = outputbuf.new(file)
   }
   jobs[file] = job

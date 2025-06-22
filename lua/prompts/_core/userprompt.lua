@@ -1,6 +1,17 @@
+---@class UserCommandArgs
+---@field name string
+---@field args string     # raw args string
+---@field fargs string[]  # split args
+---@field bang boolean
+---@field line1 integer
+---@field line2 integer
+---@field range integer
+---@field count integer
+---@field smods table
+
 local M = {}
 
-local TEMPLATE = [[
+local TEMPLATE_SELECTION = [[
 You MUST only consider the following piece of code:
 
 ```
@@ -10,17 +21,25 @@ You MUST only consider the following piece of code:
 Any other code MUST be ignored.
 ]]
 
----Create a user prompt template for code editing
----@param startline integer Starting line number (1-based)
----@param stopline integer Ending line number (1-based)
----@param range integer Number of lines selected (0 if no range)
----@return string Formatted prompt template or empty string
-function M.new(startline, stopline, range)
-  if range == 0 then
+function M.make_selection(args)
+  if args.range == 0 then
     return ''
   end
-  local lines = vim.api.nvim_buf_get_text(0, startline - 1, 0, stopline, 0, {})
-  return string.format(TEMPLATE, table.concat(lines, "\n"))
+  local lines = vim.api.nvim_buf_get_text(0, args.line1 - 1, 0, args.line2, 0, {})
+  return string.format(TEMPLATE_SELECTION, table.concat(lines, "\n"))
+end
+
+function M.make_request(args)
+  return args.args or ''
+end
+
+---Create a user prompt template for code editing
+---@param args UserCommandArgs The arguments for the user command
+---@return string Formatted prompt template or empty string
+function M.make(args)
+  local selection = M.make_selection(args)
+  local request = M.make_request(args)
+  return string.format("%s%s", selection, request)
 end
 
 return M
