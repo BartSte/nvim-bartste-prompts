@@ -18,9 +18,11 @@ local M = {}
 
 local userprompt = require("prompts._core.userprompt")
 local opts = require("prompts._core.opts")
+local outputbuf = require("prompts._core.outputbuf")
 
 ---@type table<string, prompts.Job>
 local jobs = {}
+
 
 ---Create and register a new job instance for prompt execution
 ---@param command string Shell command template with placeholders
@@ -44,7 +46,7 @@ function M.new(command, file, filetype, action, args)
     process = nil,
     tmp = string.format("%s/%s-%s", opts.get().backup_dir, hash, basename),
     userprompt = userprompt.new(args.line1, args.line2, args.range),
-    buffer = nil,
+    buffer = outputbuf.new(file)
   }
   jobs[file] = job
   return job

@@ -7,5 +7,6 @@ local M = {
   userprompt = require("prompts._core.userprompt"),
   opts = require("prompts._core.opts"),
   setup = require("prompts._core.setup"),
+  outputbuf = require("prompts._core.outputbuf"),
 }
 return M
