@@ -1,4 +1,4 @@
-# Changelog - nvim-bartste-prompts
+# Changelog - bartste-prompts
 
 This document describes the changes that were made to the software for each
 version. The changes are described concisely, to make it comprehensible for the
@@ -9,7 +9,7 @@ user. A change is always categorized based on the following types:
 - Improvement: a functionality in the software is improved.
 - Breaking Change: a change that breaks backward compatibility.
 
-## 1.0.0 - 2025-06-18
+## 1.0.0
 
 ### Breaking Change
 
@@ -18,10 +18,45 @@ user. A change is always categorized based on the following types:
 ### Features
 
 - Write output to markdown temp file and open it correctly in new tabs
+- Add `:AiExplain` command to explain selected code
+- Add `:AiShowOutput` command to view command output buffer
+- Add `:AiUndo` command to restore previous file version
 
 ### Improvements
 
-- Made prompt more generic
+- Refactor core job management and output handling
+- Use temporary files in dedicated backup directory
+- Improve user prompt template for better code focus
+
+### Bug Fixes
+
+- Fix spinner notification hiding on command exit
+
+## 0.3.3 - 2025-06-11
+
+### Bug Fixes
+
+- Implement persistent backup files and restore command with configurable backup directory
+
+## 0.3.2 - 2025-05-25
+
+### Bug Fixes
+
+- Fix AiUndo command
+- Do not show diff when nothing changed
+
+## 0.3.1 - 2025-05-25
+
+### Bug Fixes
+
+- Fix commands accepting user command arguments
+
+## 0.3.0 - 2025-05-24
+
+### Features
+
+- Support multiple aider processes in parallel
+- Replace AiStdout and AiStdErr with log file
 
 ## 0.2.0 - 2025-05-20
 
