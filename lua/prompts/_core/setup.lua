@@ -39,6 +39,9 @@ local function make_commands()
   vim.api.nvim_create_user_command("AiUndo", commands.undo, {})
   vim.api.nvim_create_user_command("AiIsRunning", commands.is_running, {})
   vim.api.nvim_create_user_command("AiAbort", commands.abort, {})
+  vim.api.nvim_create_user_command("AiShowOutput", function(opts)
+    commands.show_output(opts.args)
+  end, { nargs = '?', complete = "file" })
   make_prompt_commands()
 end
 

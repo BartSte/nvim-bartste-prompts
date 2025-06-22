@@ -7,6 +7,7 @@
 ---@field action string the <value> for `prompt <command> --action <value>`.
 ---@field process table|nil Job process handle from vim.fn.jobstart
 ---@field userprompt string User-provided input captured from prompt dialog
+---@field buffer integer Neovim buffer ID for output streaming
 
 ---@class prompts.Jobs
 ---Manages collection of active prompt jobs with file-based indexing
@@ -43,6 +44,7 @@ function M.new(command, file, filetype, action, args)
     process = nil,
     tmp = string.format("%s/%s-%s", opts.get().backup_dir, hash, basename),
     userprompt = userprompt.new(args.line1, args.line2, args.range),
+    buffer = nil,
   }
   jobs[file] = job
   return job

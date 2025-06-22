@@ -9,7 +9,7 @@ refactoring, type hints, and test generation.
 - Add type hints automatically
 - Refactor code with AI suggestions
 - Fix common code issues
-- Generate unit tests  
+- Generate unit tests
 - Operate on entire files or visual selections
 - Show spinner icon with current command and file in statusline (using lualine integration)
 - Abort running command
@@ -60,16 +60,18 @@ require('prompts').setup({
 
 ## Commands
 
-| Command         | Description                                    | Mode          |
-| --------------- | ---------------------------------------------- | ------------- |
-| `:AiDocstrings` | Generate documentation for code                | Normal, Visual |
-| `:AiTypehints`  | Add type hints automatically                   | Normal, Visual |
-| `:AiRefactor`   | Suggest refactoring improvements               | Normal, Visual |
-| `:AiFix`        | Identify and fix code issues                   | Normal, Visual |
-| `:AiTests`      | Generate unit tests for current code           | Normal, Visual |
-| `:AiIsRunning`  | Check if a prompt command is currently running | Normal |
-| `:AiAbort`      | Abort the currently running prompt command     | Normal |
-| `:AiUndo`       | Undo the last AI-generated change              | Normal |
+| Command              | Description                                    | Mode           |
+| -------------------- | ---------------------------------------------- | -------------- |
+| `:AiDocstrings`      | Generate documentation for code                | Normal, Visual |
+| `:AiTypehints`       | Add type hints automatically                   | Normal, Visual |
+| `:AiRefactor`        | Suggest refactoring improvements               | Normal, Visual |
+| `:AiExplain`         | Explain the selected code                      | Normal, Visual |
+| `:AiFix`             | Identify and fix code issues                   | Normal, Visual |
+| `:AiTests`           | Generate unit tests for current code           | Normal, Visual |
+| `:AiIsRunning`       | Check if a prompt command is currently running | Normal         |
+| `:AiAbort`           | Abort the currently running prompt command     | Normal         |
+| `:AiUndo`            | Undo the last AI-generated change              | Normal         |
+| `:AiShowOutput [file]` | View output buffer for job                   | Normal         |
 
 ## Usage
 

@@ -26,7 +26,7 @@ function M.undo(file)
   end
   local backup_dir = opts.get().backup_dir
   local abs = vim.fn.fnamemodify(file, ":p")
-  local hash = vim.fn.sha256(abs):sub(1,8)
+  local hash = vim.fn.sha256(abs):sub(1, 8)
   local basename = vim.fn.fnamemodify(file, ":t")
   local tmp = string.format("%s/%s-%s", backup_dir, hash, basename)
 
@@ -66,6 +66,21 @@ function M.abort(file)
     job.process:kill()
     require("prompts.notifier").spinner.hide(job)
     core.job.delete(file)
+  end
+end
+
+--- Show output buffer for a job
+---@param file? string Optional path to file (default: current buffer)
+function M.show_output(file)
+  if not file or file == "" then
+    file = vim.api.nvim_buf_get_name(0)
+  end
+  local job = require("prompts._core.job").get(file)
+
+  if job and job.buffer and vim.api.nvim_buf_is_valid(job.buffer) then
+    vim.cmd("sbuffer " .. job.buffer)
+  else
+    vim.notify("No output available for file: " .. file, vim.log.levels.INFO)
   end
 end
 
