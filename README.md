@@ -72,6 +72,7 @@ require('prompts').setup({
 | `:AiAbort`           | Abort the currently running prompt command     | Normal         |
 | `:AiUndo`            | Undo the last AI-generated change              | Normal         |
 | `:AiShowOutput [file]` | View output buffer for job                   | Normal         |
+| `:AiAsk`             | Ask a question and receive an AI answer        | Normal         |
 
 ## Usage
 

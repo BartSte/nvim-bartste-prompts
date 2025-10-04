@@ -25,6 +25,7 @@ local function make_prompt_commands()
     { command = "AiExplain",    type = "output", prompt = "explain" },
     { command = "AiFix",        type = "edit",   prompt = "fix" },
     { command = "AiTests",      type = "edit",   prompt = "unittests" },
+    { command = "AiAsk",        type = "ask",    prompt = "ask" },
   }
   for _, cmd in ipairs(prompt_commands) do
     vim.api.nvim_create_user_command(cmd.command, make_command(cmd.prompt, cmd.type), { range = true, nargs = '*' })

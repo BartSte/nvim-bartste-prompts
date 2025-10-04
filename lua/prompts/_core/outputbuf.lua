@@ -36,11 +36,14 @@ function M.append(bufnr, lines)
     return
   end
   if type(lines) == "string" then
-    lines = vim.split(lines, "\n", { trimempty = true })
+    lines = vim.split(lines, "\n", { trimempty = false })
   end
 
-  -- Skip empty lines
-  if not lines or #lines == 0 then
+  if type(lines) ~= "table" or #lines == 0 then
+    return
+  end
+
+  if #lines == 0 then
     return
   end
 

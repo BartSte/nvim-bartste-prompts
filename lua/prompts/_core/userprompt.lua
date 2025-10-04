@@ -12,14 +12,25 @@
 local M = {}
 
 local TEMPLATE_SELECTION = [[
-
-You MUST only consider the following piece of code:
+The user selected the following code in Neovim:
 
 ```
 %s
 ```
 
-Any other code MUST be ignored.
+You must base your answer only on this code selection.
+]]
+
+local TEMPLATE_REQUEST_WITH_SELECTION = [[
+The user's question about that selected code is:
+
+%s
+]]
+
+local TEMPLATE_REQUEST = [[
+The user's question is:
+
+%s
 ]]
 
 function M.make_selection(args)
@@ -43,7 +54,18 @@ end
 function M.make(args)
   local selection = M.make_selection(args)
   local request = M.make_request(args)
-  return string.format("%s%s", selection, request)
+  local parts = {}
+
+  if selection ~= '' then
+    table.insert(parts, selection)
+  end
+
+  if request ~= '' then
+    local template = selection ~= '' and TEMPLATE_REQUEST_WITH_SELECTION or TEMPLATE_REQUEST
+    table.insert(parts, string.format(template, request))
+  end
+
+  return table.concat(parts, "\n\n")
 end
 
 return M

@@ -13,8 +13,29 @@ end
 --- Run a command that generates output to stdout about the current buffer
 ---@param command string The shell command to execute
 ---@param args? vim.api.keyset.create_user_command.command_args The command arguments passed in the user command
+---@return nil
 function M.output(command, args)
-  core.run(command, args, "aider-ask", core.on_exit.output)
+  core.run(command, args, "aider-ask")
+end
+
+--- Run a command that asks a question and shows textual output
+---@param command string Shell command (always "ask")
+---@param args? vim.api.keyset.create_user_command.command_args
+function M.ask(command, args)
+  local seed = args and args.args or ""
+  local question = vim.fn.input("Ask question: ", seed)
+  question = vim.trim(question or "")
+  if question == "" then
+    vim.notify("Ask command cancelled", vim.log.levels.WARN)
+    return
+  end
+
+  args = vim.deepcopy(args or {})
+  args.args = question
+  if args.range == nil then
+    args.range = 0
+  end
+  return M.output(command, args)
 end
 
 --- Restore the file to its previous state before command execution
@@ -78,7 +99,8 @@ function M.show_output(file)
   local job = require("prompts._core.job").get(file)
 
   if job and job.buffer and vim.api.nvim_buf_is_valid(job.buffer) then
-    vim.cmd("sbuffer " .. job.buffer)
+    local cmd = "vert new | wincmd L | b %s | set ft=markdown | wincmd w"
+    vim.cmd(string.format(cmd, job.buffer))
   else
     vim.notify("No output available for file: " .. file, vim.log.levels.INFO)
   end
