@@ -9,6 +9,18 @@ user. A change is always categorized based on the following types:
 - Improvement: a functionality in the software is improved.
 - Breaking Change: a change that breaks backward compatibility.
 
+## 1.2.0
+
+### Features
+
+- Add `:AiAsk` command to query the AI about the current buffer or a visual selection.
+
+### Improvements
+
+- Clarify user prompts by explicitly labelling the selected code and the user’s question.
+- Collapse excess blank lines in AI output buffers for cleaner formatting.
+- Open AI output in a vertical markdown window alongside the source buffer.
+
 ## 1.0.0
 
 ### Breaking Change
