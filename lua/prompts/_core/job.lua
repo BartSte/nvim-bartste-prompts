@@ -8,6 +8,7 @@
 ---@field process table|nil Job process handle from vim.fn.jobstart
 ---@field userprompt string User-provided input captured from prompt dialog
 ---@field buffer integer Neovim buffer ID for output streaming
+---@field cwd string? Working directory when the job was created
 
 ---@class prompts.Jobs
 ---Manages collection of active prompt jobs with file-based indexing
@@ -46,7 +47,8 @@ function M.new(command, file, filetype, action, args)
     process = nil,
     tmp = string.format("%s/%s-%s", opts.get().backup_dir, hash, basename),
     userprompt = userprompt.make(args),
-    buffer = outputbuf.new(file)
+    buffer = outputbuf.new(file),
+    cwd = vim.loop.cwd(),
   }
   jobs[file] = job
   return job

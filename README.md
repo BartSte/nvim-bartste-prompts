@@ -48,6 +48,9 @@ The `setup()` function accepts the following options:
 
 - `notify` (boolean): Whether to show spinner notification after AI commands complete. Default: `false`.
 - `backup_dir` (string): Directory path where backups are stored. Default: `vim.fn.stdpath("cache") .. "/prompts_backup"`.
+- `history_dir` (string): Directory path where history is stored. Default: `vim.fn.stdpath("data") .. "/prompts/history"`.
+- `history_max_entries` (integer): Maximum number of history entries stored per file. Default: `20`.
+- `history_max_bytes` (integer): Maximum total size (in bytes) per file before pruning. Default: `1024 * 1024`.
 
 Example:
 
@@ -60,19 +63,29 @@ require('prompts').setup({
 
 ## Commands
 
-| Command              | Description                                    | Mode           |
-| -------------------- | ---------------------------------------------- | -------------- |
-| `:AiDocstrings`      | Generate documentation for code                | Normal, Visual |
-| `:AiTypehints`       | Add type hints automatically                   | Normal, Visual |
-| `:AiRefactor`        | Suggest refactoring improvements               | Normal, Visual |
-| `:AiExplain`         | Explain the selected code                      | Normal, Visual |
-| `:AiFix`             | Identify and fix code issues                   | Normal, Visual |
-| `:AiTests`           | Generate unit tests for current code           | Normal, Visual |
-| `:AiIsRunning`       | Check if a prompt command is currently running | Normal         |
-| `:AiAbort`           | Abort the currently running prompt command     | Normal         |
-| `:AiUndo`            | Undo the last AI-generated change              | Normal         |
-| `:AiShowOutput [file]` | View output buffer for job                   | Normal         |
-| `:AiAsk`             | Ask a question and receive an AI answer        | Normal         |
+| Command              | Description                                        | Mode           |
+| -------------------- | -------------------------------------------------- | -------------- |
+| `:AiDocstrings`      | Generate documentation for code                    | Normal, Visual |
+| `:AiTypehints`       | Add type hints automatically                       | Normal, Visual |
+| `:AiRefactor`        | Suggest refactoring improvements                   | Normal, Visual |
+| `:AiExplain`         | Explain the selected code                          | Normal, Visual |
+| `:AiFix`             | Identify and fix code issues                       | Normal, Visual |
+| `:AiTests`           | Generate unit tests for current code               | Normal, Visual |
+| `:AiIsRunning`       | Check if a prompt command is currently running     | Normal         |
+| `:AiAbort`           | Abort the currently running prompt command         | Normal         |
+| `:AiUndo`            | Undo the last AI-generated change                  | Normal         |
+| `:AiShowOutput [file]` | View persisted output history for the file       | Normal         |
+| `:AiAsk`             | Ask a question and receive an AI answer            | Normal         |
+
+
+### Output buffer
+
+Each command stores its AI response in a Neovim scratch buffer so you can review the generated text after it runs.
+
+- Every AI command writes its response to a scratch buffer named using `prompts-output://<filename>`, keeping per-file output separated.
+- Running commands such as `:AiAsk` creates the buffer if needed or clears the existing contents before appending the fresh response.
+- Output is persisted across sessions inside `stdpath("data")/prompts/history/...` (configurable via `history_dir`), so `:AiShowOutput` recreates the buffer even after restarting Neovim.
+- View the buffer with `:AiShowOutput [file]`; omit the filename to jump to the most recent job, or open it manually with `:b prompts-output://<filename>`.
 
 ## Usage
 

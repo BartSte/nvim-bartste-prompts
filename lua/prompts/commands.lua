@@ -96,14 +96,23 @@ function M.show_output(file)
   if not file or file == "" then
     file = vim.api.nvim_buf_get_name(0)
   end
-  local job = require("prompts._core.job").get(file)
+
+  local job = core.job.get(file)
+  local buffer
 
   if job and job.buffer and vim.api.nvim_buf_is_valid(job.buffer) then
-    local cmd = "vert new | wincmd L | b %s | wincmd w"
-    vim.cmd(string.format(cmd, job.buffer))
+    buffer = job.buffer
   else
-    vim.notify("No output available for file: " .. file, vim.log.levels.INFO)
+    buffer = core.outputbuf.new(file)
+    local has_history = core.history.render(file, buffer)
+    if not has_history then
+      vim.notify("No output available for file: " .. file, vim.log.levels.INFO)
+      return
+    end
   end
+
+  local cmd = "vert new | wincmd L | b %s | wincmd w"
+  vim.cmd(string.format(cmd, buffer))
 end
 
 return M

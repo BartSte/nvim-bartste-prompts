@@ -8,5 +8,6 @@ local M = {
   opts = require("prompts._core.opts"),
   setup = require("prompts._core.setup"),
   outputbuf = require("prompts._core.outputbuf"),
+  history = require("prompts._core.history"),
 }
 return M

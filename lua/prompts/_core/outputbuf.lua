@@ -13,6 +13,7 @@ function M.new(file)
   local bufname = M.get_name(file)
   if vim.fn.bufexists(bufname) ~= 0 then
     buf = M.get(file)
+    vim.api.nvim_buf_set_lines(buf, 0, -1, false, {})
   else
     buf = vim.api.nvim_create_buf(false, true)
     vim.api.nvim_buf_set_name(buf, bufname)
@@ -73,6 +74,15 @@ function M.append(bufnr, lines)
     vim.api.nvim_buf_set_lines(bufnr, line_count, line_count, false, lines)
     formatter.format_buffer(bufnr)
   end)
+end
+
+function M.replace(bufnr, lines)
+  if not bufnr or not vim.api.nvim_buf_is_valid(bufnr) then
+    return
+  end
+
+  vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, lines or {})
+  formatter.format_buffer(bufnr)
 end
 
 return M

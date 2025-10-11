@@ -1,4 +1,5 @@
 local global_opts = require("prompts._core.opts")
+local history = require("prompts._core.history")
 
 local setup_called = false
 
@@ -79,5 +80,6 @@ return function(opts)
     return
   end
   make_backup_dir()
+  history.setup()
   make_commands()
 end
