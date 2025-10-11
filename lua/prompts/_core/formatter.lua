@@ -1,5 +1,7 @@
+---@class PromptsFormatter
 local M = {}
 
+---@type string[]
 local HEADER_PREFIXES = {
   "^Aider v",
   "^Main model:",
@@ -11,10 +13,16 @@ local HEADER_PREFIXES = {
   "^Cost estimates",
 }
 
+--- Remove trailing whitespace from the provided text.
+---@param text string
+---@return string
 local function trim_right(text)
   return text:gsub("%s+$", "")
 end
 
+--- Determine whether a line should be skipped entirely.
+---@param line string
+---@return boolean
 local function should_skip_line(line)
   if line == "" then
     return false
@@ -28,6 +36,9 @@ local function should_skip_line(line)
   return false
 end
 
+--- Check if a line is part of the formatted header section.
+---@param line string
+---@return boolean
 local function is_header_line(line)
   for _, pattern in ipairs(HEADER_PREFIXES) do
     if line:match(pattern) then
@@ -37,6 +48,9 @@ local function is_header_line(line)
   return false
 end
 
+--- Collapse consecutive blank lines while preserving single separators.
+---@param lines string[]
+---@return string[]
 local function squash_blank_lines(lines)
   local result = {}
   local previous_blank = false
@@ -57,6 +71,10 @@ local function squash_blank_lines(lines)
   return result
 end
 
+--- Append a block of lines to the target, optionally compressing blanks.
+---@param target string[]
+---@param block string[]
+---@param compress_blank boolean
 local function append_block(target, block, compress_blank)
   if compress_blank then
     block = squash_blank_lines(block)
@@ -70,16 +88,21 @@ local function append_block(target, block, compress_blank)
   vim.list_extend(target, block)
 end
 
+--- Format the contents of the specified buffer according to output rules.
+---@param bufnr integer|nil
+---@return nil
 function M.format_buffer(bufnr)
   if not bufnr or not vim.api.nvim_buf_is_valid(bufnr) then
     return
   end
 
+  ---@type string[]
   local lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
   if #lines == 0 then
     return
   end
 
+  ---@type string[]
   local cleaned = {}
   for _, line in ipairs(lines) do
     local trimmed = trim_right(line)
@@ -101,6 +124,7 @@ function M.format_buffer(bufnr)
     return
   end
 
+  ---@type string[]
   local header = {}
   local index = 1
   while index <= #cleaned and is_header_line(cleaned[index]) do
@@ -115,6 +139,7 @@ function M.format_buffer(bufnr)
     index = index + 1
   end
 
+  ---@type integer|nil
   local tokens_index
   for i = index, #cleaned do
     if cleaned[i]:find("^Tokens:") then
@@ -123,7 +148,9 @@ function M.format_buffer(bufnr)
     end
   end
 
+  ---@type string[]
   local body = {}
+  ---@type string[]
   local footer = {}
 
   local body_end = tokens_index and tokens_index - 1 or #cleaned
@@ -136,6 +163,7 @@ function M.format_buffer(bufnr)
     end
   end
 
+  ---@type string[]
   local formatted = {}
   append_block(formatted, header, false)
   append_block(formatted, body, true)
