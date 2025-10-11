@@ -9,6 +9,18 @@ user. A change is always categorized based on the following types:
 - Improvement: a functionality in the software is improved.
 - Breaking Change: a change that breaks backward compatibility.
 
+## 1.3.0
+
+### Features
+
+- Persist per-file AI output history across sessions using a configurable disk-backed store.
+
+### Improvements
+
+- `:AiShowOutput` recreates buffers from saved history and notifies when no prior output is available.
+- Output buffers are reformatted automatically to maintain clean, readable transcripts.
+- New history settings (`history_dir`, `history_max_entries`, `history_max_bytes`) provide control over storage location and retention.
+
 ## 1.2.0
 
 ### Features
