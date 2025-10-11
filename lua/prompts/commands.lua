@@ -99,7 +99,7 @@ function M.show_output(file)
   local job = require("prompts._core.job").get(file)
 
   if job and job.buffer and vim.api.nvim_buf_is_valid(job.buffer) then
-    local cmd = "vert new | wincmd L | b %s | set ft=markdown | wincmd w"
+    local cmd = "vert new | wincmd L | b %s | wincmd w"
     vim.cmd(string.format(cmd, job.buffer))
   else
     vim.notify("No output available for file: " .. file, vim.log.levels.INFO)
