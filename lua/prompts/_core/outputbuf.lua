@@ -13,7 +13,6 @@ function M.new(file)
   local bufname = M.get_name(file)
   if vim.fn.bufexists(bufname) ~= 0 then
     buf = M.get(file)
-    vim.api.nvim_buf_set_lines(buf, 0, -1, true, {})
   else
     buf = vim.api.nvim_create_buf(false, true)
     vim.api.nvim_buf_set_name(buf, bufname)
