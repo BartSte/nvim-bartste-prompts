@@ -36,6 +36,11 @@ function M.edit(job)
 
     if helpers.diff(job.file, job.tmp) then
       vim.cmd(string.format("tabnew | e %s | diffsplit %s | set filetype=%s", job.file, job.tmp, job.filetype))
+      local tmp_bufnr = vim.fn.bufnr(job.tmp)
+      if tmp_bufnr > 0 then
+        vim.api.nvim_buf_set_option(tmp_bufnr, "buflisted", false)
+        vim.api.nvim_buf_set_option(tmp_bufnr, "bufhidden", "wipe")
+      end
     end
 
     history.save(job)
