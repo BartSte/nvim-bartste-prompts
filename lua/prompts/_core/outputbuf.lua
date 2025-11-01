@@ -3,6 +3,33 @@
 local M = {}
 local formatter = require("prompts._core.formatter")
 
+local function normalize_lines(lines)
+  if not lines then
+    return {}
+  end
+
+  if type(lines) == "string" then
+    lines = vim.split(lines, "\n", { trimempty = false })
+  end
+
+  if type(lines) ~= "table" then
+    return {}
+  end
+
+  local normalized = {}
+  for _, line in ipairs(lines) do
+    if type(line) == "string" then
+      if line:find("\n", 1, true) then
+        local parts = vim.split(line, "\n", { trimempty = false })
+        vim.list_extend(normalized, parts)
+      else
+        table.insert(normalized, line)
+      end
+    end
+  end
+  return normalized
+end
+
 ---Create or reset the output buffer for a file.
 ---@param file string Path to the file generating output
 ---@return integer bufnr The buffer number for the output buffer
@@ -53,19 +80,11 @@ function M.append(bufnr, lines)
   if not bufnr then
     return
   end
-  if type(lines) == "string" then
-    lines = vim.split(lines, "\n", { trimempty = false })
-  end
 
-  if type(lines) ~= "table" or #lines == 0 then
-    return
-  end
-
+  lines = normalize_lines(lines)
   if #lines == 0 then
     return
   end
-
-  ---@cast lines string[]
 
   -- Schedule buffer updates in main event loop
   vim.schedule(function()
@@ -81,7 +100,8 @@ function M.replace(bufnr, lines)
     return
   end
 
-  vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, lines or {})
+  lines = normalize_lines(lines)
+  vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, lines)
   formatter.format_buffer(bufnr)
 end
 
