@@ -7,7 +7,7 @@ local M = {}
 ---@param command string The shell command to execute
 ---@param args? vim.api.keyset.create_user_command.command_args The command arguments passed in the user command
 function M.edit(command, args)
-  core.run(command, args, "aider-code", core.on_exit.edit)
+    core.run(command, args, "aider-code", core.on_exit.edit)
 end
 
 --- Run a command that generates output to stdout about the current buffer
@@ -15,104 +15,125 @@ end
 ---@param args? vim.api.keyset.create_user_command.command_args The command arguments passed in the user command
 ---@return nil
 function M.output(command, args)
-  core.run(command, args, "aider-ask")
+    core.run(command, args, "aider-ask")
 end
 
 --- Run a command that asks a question and shows textual output
 ---@param command string Shell command (always "ask")
 ---@param args? vim.api.keyset.create_user_command.command_args
 function M.ask(command, args)
-  local seed = args and args.args or ""
-  local question = vim.fn.input("Ask question: ", seed)
-  question = vim.trim(question or "")
-  if question == "" then
-    vim.notify("Ask command cancelled", vim.log.levels.WARN)
-    return
-  end
+    local seed = args and args.args or ""
+    local question = vim.fn.input("Ask question: ", seed)
+    question = vim.trim(question or "")
+    if question == "" then
+        vim.notify("Ask command cancelled", vim.log.levels.WARN)
+        return
+    end
 
-  args = vim.deepcopy(args or {})
-  args.args = question
-  if args.range == nil then
-    args.range = 0
-  end
-  return M.output(command, args)
+    args = vim.deepcopy(args or {})
+    args.args = question
+    if args.range == nil then
+        args.range = 0
+    end
+    return M.output(command, args)
+end
+
+function M.commit()
+    local diff = vim.fn.system({ "git", "diff", "--cached" })
+    if vim.v.shell_error ~= 0 then
+        vim.notify("Failed to collect git diff:\n" .. diff, vim.log.levels.ERROR)
+        return
+    end
+
+    local trimmed = vim.trim(diff)
+    if trimmed == "" then
+        vim.notify("No staged changes to commit", vim.log.levels.INFO)
+        return
+    end
+
+    core.run("commit", {
+        range = 0,
+        line1 = 0,
+        line2 = 0,
+        args = diff,
+    }, "aider-commit")
 end
 
 --- Restore the file to its previous state before command execution
 ---@param file? string Optional path to file to restore (default: current buffer)
 ---@return nil
 function M.undo(file)
-  if type(file) ~= "string" then
-    file = vim.api.nvim_buf_get_name(0)
-  end
-  local backup_dir = opts.get().backup_dir
-  local abs = vim.fn.fnamemodify(file, ":p")
-  local hash = vim.fn.sha256(abs):sub(1, 8)
-  local basename = vim.fn.fnamemodify(file, ":t")
-  local tmp = string.format("%s/%s-%s", backup_dir, hash, basename)
+    if type(file) ~= "string" then
+        file = vim.api.nvim_buf_get_name(0)
+    end
+    local backup_dir = opts.get().backup_dir
+    local abs = vim.fn.fnamemodify(file, ":p")
+    local hash = vim.fn.sha256(abs):sub(1, 8)
+    local basename = vim.fn.fnamemodify(file, ":t")
+    local tmp = string.format("%s/%s-%s", backup_dir, hash, basename)
 
-  if vim.fn.filereadable(tmp) == 0 then
-    return vim.notify("No previous version to restore", vim.log.levels.ERROR)
-  end
+    if vim.fn.filereadable(tmp) == 0 then
+        return vim.notify("No previous version to restore", vim.log.levels.ERROR)
+    end
 
-  vim.fn.writefile(vim.fn.readfile(tmp), file)
-  vim.cmd("e! " .. file)
-  vim.notify(string.format("Restored %s from backup", basename), vim.log.levels.INFO)
+    vim.fn.writefile(vim.fn.readfile(tmp), file)
+    vim.cmd("e! " .. file)
+    vim.notify(string.format("Restored %s from backup", basename), vim.log.levels.INFO)
 end
 
 --- Check if there's an active job for the given file
 ---@param file? string Optional path to check (default: current buffer)
 ---@return boolean
 function M.is_running(file)
-  if type(file) ~= "string" then
-    file = vim.api.nvim_buf_get_name(0)
-  end
-  return core.job.get(file) ~= nil
+    if type(file) ~= "string" then
+        file = vim.api.nvim_buf_get_name(0)
+    end
+    return core.job.get(file) ~= nil
 end
 
 --- Abort any running job for the given file
 ---@param file? string Optional path to check (default: current buffer)
 ---@return nil
 function M.abort(file)
-  if type(file) ~= "string" then
-    file = vim.api.nvim_buf_get_name(0)
-  end
-  local job = core.job.get(file)
-  if not job or not job.process then
-    vim.notify("No job to abort for this file", vim.log.levels.ERROR)
-    return
-  end
+    if type(file) ~= "string" then
+        file = vim.api.nvim_buf_get_name(0)
+    end
+    local job = core.job.get(file)
+    if not job or not job.process then
+        vim.notify("No job to abort for this file", vim.log.levels.ERROR)
+        return
+    end
 
-  if job.process then
-    job.process:kill()
-    require("prompts.notifier").spinner.hide(job)
-    core.job.delete(file)
-  end
+    if job.process then
+        job.process:kill()
+        require("prompts.notifier").spinner.hide(job)
+        core.job.delete(file)
+    end
 end
 
 --- Show output buffer for a job
 ---@param file? string Optional path to file (default: current buffer)
 function M.show_output(file)
-  if not file or file == "" then
-    file = vim.api.nvim_buf_get_name(0)
-  end
-
-  local job = core.job.get(file)
-  local buffer
-
-  if job and job.buffer and vim.api.nvim_buf_is_valid(job.buffer) then
-    buffer = job.buffer
-  else
-    buffer = core.outputbuf.new(file)
-    local has_history = core.history.render(file, buffer)
-    if not has_history then
-      vim.notify("No output available for file: " .. file, vim.log.levels.INFO)
-      return
+    if not file or file == "" then
+        file = vim.api.nvim_buf_get_name(0)
     end
-  end
 
-  local cmd = "vert new | wincmd L | b %s | wincmd w"
-  vim.cmd(string.format(cmd, buffer))
+    local job = core.job.get(file)
+    local buffer
+
+    if job and job.buffer and vim.api.nvim_buf_is_valid(job.buffer) then
+        buffer = job.buffer
+    else
+        buffer = core.outputbuf.new(file)
+        local has_history = core.history.render(file, buffer)
+        if not has_history then
+            vim.notify("No output available for file: " .. file, vim.log.levels.INFO)
+            return
+        end
+    end
+
+    local cmd = "vert new | wincmd L | b %s | wincmd w"
+    vim.cmd(string.format(cmd, buffer))
 end
 
 return M
