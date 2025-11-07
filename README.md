@@ -71,12 +71,12 @@ require('prompts').setup({
 | `:AiExplain`         | Explain the selected code                          | Normal, Visual |
 | `:AiFix`             | Identify and fix code issues                       | Normal, Visual |
 | `:AiTests`           | Generate unit tests for current code               | Normal, Visual |
+| `:AiCommit`          | Run AI-assisted commit workflow for staged changes | Normal         |
 | `:AiIsRunning`       | Check if a prompt command is currently running     | Normal         |
 | `:AiAbort`           | Abort the currently running prompt command         | Normal         |
 | `:AiUndo`            | Undo the last AI-generated change                  | Normal         |
 | `:AiShowOutput [file]` | View persisted output history for the file       | Normal         |
 | `:AiAsk`             | Ask a question and receive an AI answer            | Normal         |
-
 
 ### Output buffer
 
