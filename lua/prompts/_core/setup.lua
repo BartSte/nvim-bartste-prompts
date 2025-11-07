@@ -1,10 +1,13 @@
 local global_opts = require("prompts._core.opts")
 local history = require("prompts._core.history")
+local log = require("prompts._core.log")
 
 local setup_called = false
 
 local function make_backup_dir()
-  vim.fn.mkdir(global_opts.get().backup_dir, "p")
+  local dir = global_opts.get().backup_dir
+  vim.fn.mkdir(dir, "p")
+  log.debug("Ensured backup directory exists at %s", dir)
 end
 
 --- Creates a Neovim user command handler for a specific prompt type
@@ -30,6 +33,7 @@ local function make_prompt_commands()
   }
   for _, cmd in ipairs(prompt_commands) do
     vim.api.nvim_create_user_command(cmd.command, make_command(cmd.prompt, cmd.type), { range = true, nargs = '*' })
+    log.debug("Registered %s command (prompt=%s)", cmd.command, cmd.prompt)
   end
 end
 
@@ -44,6 +48,7 @@ local function make_commands()
   vim.api.nvim_create_user_command("AiShowOutput", function(opts)
     commands.show_output(opts.args)
   end, { nargs = '?', complete = "file" })
+  log.debug("Registered base AI commands")
   make_prompt_commands()
 end
 
@@ -51,11 +56,21 @@ end
 --- Checks for 'prompts' and 'aider' binaries
 ---@return boolean Result Returns true if all required executables are found, false otherwise
 local function check_executables()
-  local result = vim.fn.executable("prompts") == 1 and vim.fn.executable("aider") == 1
-  if not result then
-    vim.notify("Missing required executables: 'prompts' and/or 'aider' must be in PATH", vim.log.levels.ERROR)
+  local missing = {}
+  if vim.fn.executable("prompts") == 0 then
+    table.insert(missing, "prompts")
   end
-  return result
+  if vim.fn.executable("aider") == 0 then
+    table.insert(missing, "aider")
+  end
+  if #missing > 0 then
+    local message = string.format("Missing required executables: %s must be in PATH", table.concat(missing, ", "))
+    log.error(message)
+    vim.notify(message, vim.log.levels.ERROR)
+    return false
+  end
+  log.debug("All required executables available: prompts, aider")
+  return true
 end
 
 --- Initializes the plugin setup and configuration
@@ -64,23 +79,40 @@ end
 ---@error Missing AIDER_MODEL environment variable
 ---@error Missing required executables in PATH
 return function(opts)
+  log.debug("prompts.setup invoked")
   if setup_called then
+    log.debug("Setup already completed, skipping")
     return
   end
   setup_called = true
 
+  opts = opts or {}
+  global_opts.update(opts)
+  local config = global_opts.get()
+  log.setup(config)
+
   if vim.env["AIDER_MODEL"] == nil then
-    vim.notify("AIDER_MODEL environment variable not set. Aborting setup.", vim.log.levels.ERROR)
+    local message = "AIDER_MODEL environment variable not set. Aborting setup."
+    log.error(message)
+    vim.notify(message, vim.log.levels.ERROR)
     return
   end
 
-  opts = opts or {}
-  global_opts.update(opts)
   vim.env["AIDER_AUTO_COMMITS"] = "False"
+  log.debug("Disabled aider auto commits")
+
   if not check_executables() then
     return
   end
+
   make_backup_dir()
+  log.debug("Backup directory ready at %s", config.backup_dir)
+
   history.setup()
+  log.debug("History storage initialised at %s", config.history_dir)
+
   make_commands()
+  log.debug("Command registration completed")
+
+  log.info("prompts setup completed")
 end

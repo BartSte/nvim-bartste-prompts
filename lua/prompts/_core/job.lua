@@ -20,10 +20,10 @@ local M = {}
 local userprompt = require("prompts._core.userprompt")
 local opts = require("prompts._core.opts")
 local outputbuf = require("prompts._core.outputbuf")
+local log = require("prompts._core.log")
 
 ---@type table<string, prompts.Job>
 local jobs = {}
-
 
 ---Create and register a new job instance for prompt execution
 ---@param command string Shell command template with placeholders
@@ -34,6 +34,7 @@ local jobs = {}
 ---@return prompts.Job? job Initialized job instance or nil if conflict exists
 function M.new(command, file, filetype, action, args)
   if jobs[file] ~= nil then
+    log.warn("Job already running for %s; refusing to start another", file)
     return nil
   end
 
@@ -50,6 +51,7 @@ function M.new(command, file, filetype, action, args)
     buffer = outputbuf.new(file),
     cwd = vim.loop.cwd(),
   }
+  log.debug("Created job command=%s action=%s file=%s tmp=%s", command, action, file, job.tmp)
   jobs[file] = job
   return job
 end
@@ -67,6 +69,7 @@ end
 ---@return nil
 function M.delete(file)
   jobs[file] = nil
+  log.debug("Removed job for %s", file)
 end
 
 return M
