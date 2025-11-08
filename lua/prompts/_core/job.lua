@@ -51,7 +51,7 @@ function M.new(command, file, filetype, action, args)
     buffer = outputbuf.new(file),
     cwd = vim.loop.cwd(),
   }
-  log.debug("Created job command=%s action=%s file=%s tmp=%s", command, action, file, job.tmp)
+  log.debug("Created job: %s", vim.inspect(job))
   jobs[file] = job
   return job
 end

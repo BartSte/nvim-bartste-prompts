@@ -15,7 +15,8 @@ function M.default(job)
     local exit_code = obj and obj.code or -1
     log.debug("Job %s finished with exit code %d", job.command, exit_code)
     if exit_code ~= 0 then
-      local message = string.format("Command failed with exit code: %d", exit_code)
+      local message = string.format("Command failed with exit code: %d. The error object is %s", exit_code,
+        vim.inspect(obj))
       log.error(message)
       vim.notify(message, vim.log.levels.ERROR)
     else

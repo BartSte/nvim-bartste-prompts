@@ -1,3 +1,5 @@
+local log = require("prompts._core.log")
+
 ---@class UserCommandArgs
 ---@field name string
 ---@field args string     # raw args string
@@ -11,48 +13,47 @@
 
 local M = {}
 
-local TEMPLATE_INPUT = [[
+local TEMPLATE = [[
 The user provided the following text:
 
 %s
 ]]
 
-local TEMPLATE_SELECTION = [[
-The user selected the following:
-
-```
-%s
-```
-
-You must base your answer only on this piece of text.
-]]
-
 function M.get_selection(args)
-    if args.range == 0 then
-        return nil
-    end
-    local lines = vim.api.nvim_buf_get_text(0, args.line1 - 1, 0, args.line2, 0, {})
-    return string.format(TEMPLATE_SELECTION, table.concat(lines, "\n"))
+  if args.range == 0 then
+    return nil
+  end
+  local lines = vim.api.nvim_buf_get_text(0, args.line1 - 1, 0, args.line2, 0, {})
+  return string.format(TEMPLATE, table.concat(lines, "\n"))
 end
 
 function M.get_input(args)
-    if args.args == '' then
-        return nil
-    end
-    return string.format(TEMPLATE_INPUT, args.args)
+  if args.args == '' then
+    return nil
+  end
+  return string.format(TEMPLATE, args.args)
 end
 
 ---Create a user prompt template for code editing
 ---@param args UserCommandArgs The arguments for the user command
 ---@return string Formatted prompt template or empty string
 function M.make(args)
-    local parts = {}
-    local selection = M.get_selection(args)
-    local input = M.get_input(args)
-    for _, value in ipairs({selection, input}) do
-        if value then table.insert(parts, value) end
-    end
-    return table.concat(parts, "\n\n")
+  log.debug("Creating user prompt with args: %s", vim.inspect(args))
+  local parts = {}
+
+  local selection = M.get_selection(args)
+  if selection then
+    table.insert(parts, selection)
+  end
+
+  local input = M.get_input(args)
+  if input then
+    table.insert(parts, input)
+  end
+
+  local prompt = table.concat(parts, "\n\n")
+  log.debug("User prompt is: %s", prompt)
+  return prompt
 end
 
 return M
