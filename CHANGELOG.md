@@ -9,6 +9,29 @@ user. A change is always categorized based on the following types:
 - Improvement: a functionality in the software is improved.
 - Breaking Change: a change that breaks backward compatibility.
 
+## 1.5.0
+
+### Features
+
+- Add comprehensive logging system with configurable log levels and file output
+
+### Improvements
+
+- Enhance error handling and debugging information throughout the codebase
+- Refactor user prompt templates for better consistency
+- Improve job management with better state tracking and process monitoring
+- Update documentation to include :AiCommit command
+
+## 1.4.0
+
+### Features
+
+- Add `:AiCommit` command to generate commit messages from staged changes.
+
+### Improvements
+
+- Enhance output buffer line normalization for more robust handling
+
 ## 1.3.0
 
 ### Features
