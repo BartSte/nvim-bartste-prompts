@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+
+THIS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+usage="Usage: run
+
+Run all tests in the $THIS_DIR directory using Neovim in headless mode.
+
+Options:
+  -h, --help    Show this help message and exit"
+
+parse_args() {
+    while [[ $# -gt 0 ]]; do
+        case $1 in
+        -h | --help)
+            echo "$usage"
+            exit 0
+            ;;
+        *)
+            echo "Unknown option: $1"
+            echo "$usage"
+            exit 1
+            ;;
+        esac
+    done
+}
+
+run_tests() {
+    local dir
+    dir="$1"
+    command="lua require('plenary.test_harness').test_directory('$dir', { minimal_init = '$dir/minimal_init.lua' })"
+    echo "Running tests in: $dir" >&2
+    nvim --headless -c "$command"
+}
+
+parse_args "$@" && run_tests "$THIS_DIR"

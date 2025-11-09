@@ -1,4 +1,3 @@
-local notifier = require("snacks").notifier
 local opts = require("prompts._core.opts")
 
 --- A notifier module that displays and hides a spinner notification.
@@ -48,7 +47,7 @@ function M.spinner.show(job)
       end
 
       local msg = table.concat(messages, "\n")
-      notifier.notify(msg, "info", {
+      require("snacks").notifier.notify(msg, "info", {
         id = M.spinner.id,
         icon = "󰚥",
         timeout = false,
@@ -75,7 +74,7 @@ function M.spinner.hide(job)
     M.spinner.timer:stop()
     M.spinner.timer:close()
     M.spinner.timer = nil
-    notifier.hide(M.spinner.id)
+    require("snacks").notifier.hide(M.spinner.id)
   end
 end
 
