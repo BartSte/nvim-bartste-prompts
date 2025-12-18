@@ -10,5 +10,6 @@ local M = {
   setup = require("prompts._core.setup"),
   outputbuf = require("prompts._core.outputbuf"),
   history = require("prompts._core.history"),
+  git = require("prompts._core.git"),
 }
 return M
