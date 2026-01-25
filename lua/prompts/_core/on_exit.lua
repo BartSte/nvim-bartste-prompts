@@ -1,4 +1,4 @@
-local jobs = require("prompts._core.job")
+local registry = require("prompts._core.registry")
 local helpers = require("prompts._core.helpers")
 local notifier = require("prompts.notifier").spinner
 local history = require("prompts._core.history")
@@ -24,7 +24,7 @@ function M.default(job)
       log.debug("Saving history for %s", job.file)
       history.save(job)
     end
-    jobs.delete(job.file)
+    registry.delete(job.file)
   end)
 end
 
@@ -40,7 +40,7 @@ function M.edit(job)
       local message = string.format("Command failed with exit code: %d", exit_code)
       log.error(message)
       vim.notify(message, vim.log.levels.ERROR)
-      jobs.delete(job.file)
+      registry.delete(job.file)
       return
     end
 
@@ -59,7 +59,7 @@ function M.edit(job)
     log.debug("Saving history for %s", job.file)
     history.save(job)
     log.debug("Cleaning up job state for %s", job.file)
-    jobs.delete(job.file)
+    registry.delete(job.file)
   end)
 end
 

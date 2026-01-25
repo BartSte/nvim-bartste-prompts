@@ -7,7 +7,7 @@ local function show_output(file)
     end
     log.info("Showing output for %s", file)
 
-    local job = core.job.get(file)
+    local job = core.registry.get(file)
     local buffer
 
     if job and job.buffer and vim.api.nvim_buf_is_valid(job.buffer) then

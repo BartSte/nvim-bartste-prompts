@@ -7,7 +7,7 @@ local function abort(file)
         file = vim.api.nvim_buf_get_name(0)
     end
     log.info("Abort requested for %s", file)
-    local job = core.job.get(file)
+    local job = core.registry.get(file)
     if not job or not job.process then
         log.warn("No job to abort for %s", file)
         vim.notify("No job to abort for this file", vim.log.levels.ERROR)
@@ -18,7 +18,7 @@ local function abort(file)
         log.info("Terminating job for %s", file)
         job.process:kill()
         notifier.spinner.hide(job)
-        core.job.delete(file)
+        core.registry.delete(file)
     end
 end
 

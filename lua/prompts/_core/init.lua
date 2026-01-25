@@ -3,6 +3,8 @@
 local M = {
   run = require("prompts._core.run"),
   job = require("prompts._core.job"),
+  registry = require("prompts._core.registry"),
+  runner = require("prompts._core.runner"),
   log = require("prompts._core.log"),
   on_exit = require("prompts._core.on_exit"),
   userprompt = require("prompts._core.userprompt"),

@@ -5,7 +5,7 @@ local function is_running(file)
     if type(file) ~= "string" then
         file = vim.api.nvim_buf_get_name(0)
     end
-    local running = core.job.get(file) ~= nil
+    local running = core.registry.get(file) ~= nil
     log.debug("Checked running job for %s -> %s", file, tostring(running))
     return running
 end
